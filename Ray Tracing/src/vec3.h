@@ -154,3 +154,17 @@ inline vec3& vec3::operator/=(const float t) {
 inline vec3 unit_vector(vec3 v) {
 	return v / v.length();
 }
+
+float rand_max = 32767.0f + 1.0f;
+
+inline float drand48() {
+	return float(rand()) / rand_max;
+}
+
+vec3 random_in_unit_sphere() {
+	vec3 p;
+	do {
+		p = 2.0 * vec3(drand48(), drand48(), drand48()) - vec3(1, 1, 1);
+	} while (p.squared_length() >= 1.0);
+	return p;
+}
