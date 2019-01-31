@@ -32,31 +32,29 @@ vec3 color(const ray& r, hitable *world, int depth) {
 
 int main() {
 	int nx, ny, ns;
-	bool cheap = false;
+	bool cheap = true;
 
 	if (cheap) {
 		nx = 200;
 		ny = 100;
-		ns = 20;
+		ns = 30;
 	} else {
-		nx = 200 * 2;
-		ny = 100 * 2;
+		nx = 200 * 4;
+		ny = 100 * 4;
 		ns = 20 * 5;
 	}
 	
 	
 	std::vector<unsigned char> pixels;
 
-	hitable* list[4];
+	camera cam(90, float(nx)/float(ny));
+	hitable* list[2];
+	
+	float R = cos(M_PI / 4);
+	list[0] = new sphere(vec3(-R, 0, -1), R, new lambertian(vec3(0, 0, 1)));
+	list[1] = new sphere(vec3(R, 0, -1), R, new lambertian(vec3(1, 0, 0)));
 
-	list[0] = new sphere(vec3(0, 0, -1), 0.5, new lambertian(vec3(0.8, 0.3, 0.3)) );
-	list[1] = new sphere(vec3(0, -100.5, -1), 100, new lambertian(vec3(0.8, 0.8, 0.0)));
-	list[2] = new sphere(vec3(1, 0, -1), 0.5, new lambertian(vec3(0.8, 0.6, 0.2)));
-	list[3] = new sphere(vec3(-1, 0, -1), 0.5, new lambertian(vec3(0.8, 0.8, 0.8)));
-
-
-	hitable* world = new hitable_list(list, 4);
-	camera cam;
+	hitable* world = new hitable_list(list, 2);
 
 	for (int j = ny - 1; j >= 0; j--) {
 		for (int i = 0; i < nx; i++) {
