@@ -10,10 +10,10 @@
 #include "camera.h"
 #include "material.h"
 
-#define nx 400
-#define ny 200
-#define ns 30
-#define spheries 100
+#define nx 1200
+#define ny 800
+#define ns 100
+#define spheries 600
 #define cores 8
 
 float nearly256 = 255.99;
@@ -22,7 +22,7 @@ unsigned int chunk_pixel_size = nx * ny / cores;
 unsigned char pixels[nx * ny * 3 + 100];
 std::thread threads[cores];
 
-camera cam(vec3(13, 2, 3), vec3(0, 0, 0), vec3(0, 1, 0), 30, float(nx) / float(ny), 0.01, 10);
+camera cam(vec3(13, 2, 3), vec3(0, 0, 0), vec3(0, 1, 0), 30, float(nx) / float(ny), 0.05, 10);
 hitable* g_world;
 
 hitable *random_scene() {
