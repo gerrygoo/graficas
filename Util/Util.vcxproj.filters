@@ -29,13 +29,13 @@
     <ClInclude Include="include\ifile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\time.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\image_writer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\time_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
