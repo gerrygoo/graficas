@@ -10,26 +10,31 @@
 #include "camera.h"
 #include "material.h"
 
+#define nx 400
+#define ny 200
+#define ns 30
+#define spheries 100
+#define cores 8
+
 float nearly256 = 255.99;
+unsigned int chunk_pixel_size = nx * ny / cores;
 
-int 
-nx = 200,
-ny = 100,
-ns = 20;
+unsigned char pixels[nx * ny * 3 + 100];
+std::thread threads[cores];
 
-unsigned char pixels[200 * 100 * 3];
-camera cam(vec3(13, 2, 3), vec3(0, 0, 0), vec3(0, 1, 0), 30, float(200) / float(100), 0.1, 10);
+camera cam(vec3(13, 2, 3), vec3(0, 0, 0), vec3(0, 1, 0), 30, float(nx) / float(ny), 0.01, 10);
+hitable* g_world;
 
 hitable *random_scene() {
 
-	int n = 100;
+	int n = spheries;
 
 	hitable **list = new hitable*[n + 5];
 	list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(vec3(0.5, 0.5, 0.5)));
 	list[1] = new sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
 	list[2] = new sphere(vec3(-4, 1, 0), 1.0, new lambertian(vec3(0.4, 0.2, 0.1)));
 	list[3] = new sphere(vec3(4, 1, 0), 1.0, new dielectric(1.5));
-	list[4] = new sphere(vec3(8, 1, 0), 1.0, new dielectric(1.5));
+	list[4] = new sphere(vec3(7, 1, 0), 1.0, new dielectric(1.5));
 	
 
 	int i = 5;
@@ -78,7 +83,7 @@ vec3 color(const ray& r, hitable *world, int depth) {
 	}
 }
 
-void color_pixel(int c, camera& cam, hitable* world, int i, int j) {
+void color_pixel(int c, int i, int j) {
 	vec3 col(0, 0, 0);
 	for (int s = 0; s < ns; s++) {
 
@@ -86,7 +91,7 @@ void color_pixel(int c, camera& cam, hitable* world, int i, int j) {
 		float v = float(j + drand48()) / float(ny);
 		ray r = cam.get_ray(u, v);
 
-		col += color(r, world, 0);
+		col += color(r, g_world, 0);
 	}
 	col /= float(ns);
 
@@ -95,30 +100,25 @@ void color_pixel(int c, camera& cam, hitable* world, int i, int j) {
 	pixels[c + 2] = int(nearly256 * sqrt(col[2]));
 }
 
-int main() {
-	
-	std::vector<std::thread> threads;
-
-	hitable* world = random_scene();
-
-	int c = 0;
-	for (int j = ny - 1; j >= 0; j--) {
-		for (int i = 0; i < nx; i++) {
-			//color_pixel(c, cam, world, i, j);
-			/*threads.push_back(std::thread(
-				[&]() {
-				color_pixel(pixels, c, cam, world, i, j);
-				}
-			));*/
-
-
-			threads.push_back( std::thread(color_pixel, c, std::ref(cam), world, i, j) );
-			
-			
-			c += 3;
-		}
+void color_chunk(int chunk_no) {
+	unsigned int initial_pixel = chunk_no * chunk_pixel_size;
+	//std::cout << initial_pixel << "to --" << initial_pixel + chunk_pixel_size << "\n";
+	unsigned int current_pixel = initial_pixel;
+	int i, j;
+	for (int ii = 0; ii < chunk_pixel_size; ii++) {
+		
+		i = current_pixel % nx;
+		j = ny - 1 - current_pixel / nx;
+		color_pixel(current_pixel * 3, i, j);
+		current_pixel++;
 	}
+}
 
+int main() {
+
+	g_world = random_scene();
+
+	for (int i = 0; i < cores; i++ ) threads[i] = std::thread(color_chunk, i);
 	for (auto &t : threads) t.join();
 
 	image_writer::save_jpg("out.png", nx, ny, 3, pixels);
