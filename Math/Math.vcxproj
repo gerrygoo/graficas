@@ -18,6 +18,12 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\complex.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\complex.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{05C1DDD7-4263-40B2-B95C-BD61913CC590}</ProjectGuid>

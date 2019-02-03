@@ -10,8 +10,10 @@
 #include "camera.h"
 #include "material.h"
 
-#define nx 1200
-#define ny 800
+#define verbose true
+
+#define nx 1920
+#define ny 1080
 #define ns 100
 #define spheries 600
 #define cores 8
@@ -32,7 +34,7 @@ hitable *random_scene() {
 	hitable **list = new hitable*[n + 5];
 	list[0] = new sphere(vec3(0, -1000, 0), 1000, new lambertian(vec3(0.5, 0.5, 0.5)));
 	list[1] = new sphere(vec3(0, 1, 0), 1.0, new dielectric(1.5));
-	list[2] = new sphere(vec3(-4, 1, 0), 1.0, new lambertian(vec3(0.4, 0.2, 0.1)));
+	list[2] = new sphere(vec3(-4, 1, 0), 1.0, new metal(vec3(1, 1, 1), 0.0));
 	list[3] = new sphere(vec3(4, 1, 0), 1.0, new dielectric(1.5));
 	list[4] = new sphere(vec3(7, 1, 0), 1.0, new dielectric(1.5));
 	
@@ -102,15 +104,17 @@ void color_pixel(int c, int i, int j) {
 
 void color_chunk(int chunk_no) {
 	unsigned int initial_pixel = chunk_no * chunk_pixel_size;
-	//std::cout << initial_pixel << "to --" << initial_pixel + chunk_pixel_size << "\n";
 	unsigned int current_pixel = initial_pixel;
-	int i, j;
+
+	unsigned int progress = 0, decile = 0;
+
 	for (int ii = 0; ii < chunk_pixel_size; ii++) {
-		
-		i = current_pixel % nx;
-		j = ny - 1 - current_pixel / nx;
-		color_pixel(current_pixel * 3, i, j);
-		current_pixel++;
+		color_pixel( current_pixel++ * 3, current_pixel % nx, ny - 1 - current_pixel / nx );
+
+		if (++progress > chunk_pixel_size / 10) {
+			if (verbose) std::cout << chunk_no << "-" << ++decile << "0%\n";
+			progress = 0;
+		}
 	}
 }
 
