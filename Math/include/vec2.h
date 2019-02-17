@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 
 namespace cgmath {
@@ -5,7 +6,7 @@ namespace cgmath {
         public:
             float x, y;
             
-            vec2(){ }
+            vec2(): x(), y(){ }
             vec2(float x, float y): x(x), y(y) { }
 
             

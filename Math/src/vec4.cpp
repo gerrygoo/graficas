@@ -3,6 +3,7 @@
 
 namespace cgmath{
     float& vec4::operator[](int i) { return (&x)[i]; }
+    const float& vec4::operator[](int i) const { return (&x)[i]; }
 
     vec4& vec4::operator*=(float s) {
         x *= s; y *= s; z *= s; w *= s;

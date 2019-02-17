@@ -1,6 +1,5 @@
-// #include "vec3.h"
-#include "./include/vec3.h"
 #include <math.h>
+#include "vec3.h"
 
 namespace cgmath {
     // members
@@ -13,7 +12,7 @@ namespace cgmath {
     }
 
     vec3& vec3::operator/=(float s) {
-        x /= s; y /= s; z *= s;
+        x /= s; y /= s; z /= s;
         return *this;
     }
 
@@ -56,6 +55,14 @@ namespace cgmath {
     float vec3::dot(const vec3& u, const vec3& v) {
         return u.x * v.x + u.y * v.y + u.z * v.z;
     }
+
+	vec3 vec3::cross(const vec3& u, const vec3& v) {
+		return vec3(
+			u[1] * v[2] - u[2] * v[1],
+			u[2] * v[0] - u[0] * v[2],
+			u[0] * v[1] - u[1] * v[0]
+		);
+	}
 
     // friends
     std::ostream& operator<<(std::ostream& o, const vec3& v) {

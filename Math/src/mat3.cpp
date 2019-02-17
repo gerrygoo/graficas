@@ -1,15 +1,10 @@
 #include "mat3.h"
 
 namespace cgmath {
-    mat3::mat3(float diagonal) { n[0][0] = n[1][1] = n[2][2] = diagonal; }
-    mat3::mat3(const vec3& i, const vec3& j, const vec3& k) { 
-        std::copy((&i.x), (&i.x) + 3, n[0]);
-        std::copy((&j.x), (&j.x) + 3, n[1]);
-        std::copy((&k.x), (&k.x) + 3, n[2]);
-    }
+    
 
     vec3& mat3::operator[](int i) { return reinterpret_cast<vec3&>(n[i]); }
-    // const vec3& mat3::operator[](int i) const { return reinterpret_cast<const vec3&>(n[i]); }
+    const vec3& mat3::operator[](int i) const { return reinterpret_cast<const vec3&>(n[i]); }
     
     bool mat3::operator==(const mat3& m) const {
         return this->operator[](0) == m[0] && this->operator[](1) == m[1] && this->operator[](2) == m[2];
@@ -28,23 +23,24 @@ namespace cgmath {
         mat3 inverse(1.0f);
 
         for (int i = 0; i < 3; i++ ) {
-            vec3 row = original[i];
-            float a = row[i];
+            float a = original[i][i];
+			original[i] /= a;
+			inverse[i] /= a;
 
             //zero up
             for (int j = i - 1; j >= 0; j--) {
                 float b = original[j][i];
-                original[j] = original[j] - (row * b)/a;
+				original[j] += original[i] * -b;
+				inverse[j] += inverse[i] * -b;
             }
 
             //zero down
             for (int j = i + 1; j < 3; j++) {
                 float b = original[j][i];
-                original[j] = original[j] - (row * b)/a;
+				original[j] += original[i] * -b;
+				inverse[j] += inverse[i] * -b;
             }
         }
-
-        std::cout << original;
 
         return inverse;
     }
@@ -58,8 +54,9 @@ namespace cgmath {
     }
 
     std::ostream& operator<<(std::ostream& o, const mat3& m) {
-        o   << m[0][0] << " " << m[1][0] << " " << m[2][0] << '\n'
-            << m[0][1] << " " << m[1][1] << " " << m[2][1] << '\n'
-            << m[0][2] << " " << m[1][2] << " " << m[2][2] << '\n';
+        return o 
+			<< m[0][0] << " " << m[1][0] << " " << m[2][0] << '\n'
+			<< m[0][1] << " " << m[1][1] << " " << m[2][1] << '\n'
+            << m[0][2] << " " << m[1][2] << " " << m[2][2];
     }
 }
