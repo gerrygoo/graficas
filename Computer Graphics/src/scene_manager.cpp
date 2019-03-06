@@ -1,4 +1,7 @@
 #include "scene_manager.h"
+#include "scene_primitives.h"
+//#include "scene_conchoid.h"
+#include "scene_chaikin.h"
 
 #include <iostream>
 
@@ -79,9 +82,12 @@ void scene_manager::initialize()
 	// Ejemplo de como agregar escenas al proyecto
 	//std::unique_ptr<scene> somescene(new scene_project);
 	//sceneList.push_back(std::move(somescene));
-	
-	std::unique_ptr<scene> scene1(new scene_compatibility);
-	sceneList.push_back(std::move(scene1));
+
+	//std::unique_ptr<scene> scene1(new scene_compatibility);
+	//sceneList.push_back(std::move(scene1));
+
+	std::unique_ptr<scene> scene2(new scene_chaikin);
+	sceneList.push_back(std::move(scene2));
 
 	for (auto& s : sceneList)
 		s->init();
