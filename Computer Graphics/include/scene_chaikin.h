@@ -1,15 +1,18 @@
 #pragma once
 #include <vector>
-#include <list>
-
 #include "scene.h"
 #include "vec2.h"
 
 class scene_chaikin : public scene {
 public:
 	void init();
+
 	void initVAO();
 	void defineVAO();
+
+	void initDots();
+	void densifyDots(int);
+
 	void chaikinize(bool);
 
 	void awake();
@@ -23,11 +26,18 @@ public:
 	void passiveMotion(int x, int y) { };
 
 private:
+	GLuint dotsVBO;
+	GLuint dotsVAO;
+
 	GLuint positionsVBO;
 	GLuint vao;
+
 	GLenum primitiveType;
 
-	std::list<cgmath::vec2> v;
+	bool dotted;
+	std::vector<cgmath::vec2> orig;
+
+	std::vector<cgmath::vec2> v;
 	std::vector<int> firsts;
 	std::vector<int> counts;
 };
