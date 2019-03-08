@@ -15,6 +15,8 @@ public:
 
 	void chaikinize(bool);
 
+	void add_segment(std::vector<cgmath::vec2>&);
+
 	void awake();
 	void sleep() { }
 	void reset() { }
@@ -36,6 +38,8 @@ private:
 
 	bool dotted;
 	std::vector<cgmath::vec2> orig;
+	std::vector<int> o_firsts;
+	std::vector<int> o_counts;
 
 	std::vector<cgmath::vec2> v;
 	std::vector<int> firsts;
