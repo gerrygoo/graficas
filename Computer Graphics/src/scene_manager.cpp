@@ -1,7 +1,10 @@
 #include "scene_manager.h"
 #include "scene_primitives.h"
-//#include "scene_conchoid.h"
+#include "scene_conchoid.h"
 #include "scene_chaikin.h"
+#include "scene_vertex.h"
+#include "scene_fragment.h"
+
 
 #include <iostream>
 
@@ -22,7 +25,9 @@ void scene_manager::start(int argc, char* argv[], const std::string& name, int w
 
 	// Freeglut init
 	glutInit(&argc, argv);
-	glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+	//glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+	glutInitContextProfile(GLUT_CORE_PROFILE);
+	glutInitContextFlags(GLUT_FORWARD_COMPATIBLE);
 	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
 	glutInitWindowSize(width, height);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
@@ -37,6 +42,7 @@ void scene_manager::start(int argc, char* argv[], const std::string& name, int w
 	glutPassiveMotionFunc(passiveMotion);
 
 	// Glew init
+	glewExperimental = true;
 	glewInit();
 
 	// OpenGL init
@@ -80,14 +86,17 @@ void scene_manager::prev()
 void scene_manager::initialize()
 {
 	// Ejemplo de como agregar escenas al proyecto
-	//std::unique_ptr<scene> somescene(new scene_project);
-	//sceneList.push_back(std::move(somescene));
+	// std::unique_ptr<scene> somescene(new scene_project);
+	// sceneList.push_back(std::move(somescene));
 
-	//std::unique_ptr<scene> scene1(new scene_compatibility);
-	//sceneList.push_back(std::move(scene1));
+	// std::unique_ptr<scene> scene1(new scene_compatibility);
+	// sceneList.push_back(std::move(scene1));
 
 	std::unique_ptr<scene> scene2(new scene_chaikin);
 	sceneList.push_back(std::move(scene2));
+
+	//std::unique_ptr<scene> scene3(new scene_vertex);
+	//sceneList.push_back(std::move(scene3));
 
 	for (auto& s : sceneList)
 		s->init();

@@ -29,13 +29,14 @@ void scene_chaikin::defineVAO() {
 	glBindVertexArray(0);
 }
 
-void scene_chaikin::chaikinize(bool in_a_loop = false) {
+void scene_chaikin::chaikinize() {
 	float threefourths = 3.0f / 4.0f;
 	float onefourth = 1.0f / 4.0f;
 	std::vector<cgmath::vec2> chaikinized;
 
 	// for each geometry
 	for (int range = 0; range < firsts.size(); range++) {
+		bool in_a_loop = inaloop[range];
 		int count = counts[range];
 		int first = firsts[range];
 
@@ -59,6 +60,9 @@ void scene_chaikin::chaikinize(bool in_a_loop = false) {
 		}
 		if (!in_a_loop) {
 			chaikinized.push_back(v[first + count - 1]);
+			n_count++;
+		} else {
+			chaikinized.push_back(chaikinized[n_first]);
 			n_count++;
 		}
 
@@ -121,7 +125,7 @@ void scene_chaikin::densifyDots(int factor) {
 	orig = dense;
 }
 
-void scene_chaikin::add_segment(std::vector<cgmath::vec2>& segment) {
+void scene_chaikin::add_segment(std::vector<cgmath::vec2>& segment, bool loopy) {
 	float scale = (1.0f / 6.5f);
 	auto disp = cgmath::vec2(0.0f, 1.3f);
 
@@ -130,11 +134,13 @@ void scene_chaikin::add_segment(std::vector<cgmath::vec2>& segment) {
 
 	firsts.push_back(start_at); o_firsts.push_back(start_at);
 	counts.push_back( segment.size() ); o_counts.push_back(segment.size());
+	inaloop.push_back(loopy);
 }
 
 void scene_chaikin::init() {
-	primitiveType = GL_POINTS;
+	primitiveType = GL_LINE_STRIP;
 	dotted = false;
+	curved = true;
 
 	std::vector<cgmath::vec2> pickle;
 	pickle.push_back(cgmath::vec2(2.62f, 2.54f) );
@@ -152,7 +158,7 @@ void scene_chaikin::init() {
 	pickle.push_back( cgmath::vec2(1.94f, 4.45f) );
 	pickle.push_back( cgmath::vec2(2.44f, 3.75f) );
 	pickle.push_back( cgmath::vec2(2.62f, 2.54f) );
-	this->add_segment(pickle);
+	this->add_segment(pickle, true);
 
 	std::vector<cgmath::vec2> eyebrow;
 	eyebrow.push_back(cgmath::vec2(0.0f, 4.01f));
@@ -164,7 +170,7 @@ void scene_chaikin::init() {
 	eyebrow.push_back(cgmath::vec2(0.42f, 3.97f));
 	eyebrow.push_back(cgmath::vec2(0.01f, 3.88f));
 	eyebrow.push_back(cgmath::vec2(0.0f, 4.01f));
-	this->add_segment(eyebrow);
+	this->add_segment(eyebrow, false);
 
 	std::vector<cgmath::vec2> left_eye;
 	left_eye.push_back( cgmath::vec2(-0.57f, 3.17f) );
@@ -173,7 +179,7 @@ void scene_chaikin::init() {
 	left_eye.push_back(cgmath::vec2(0.27f, 2.53f));
 	left_eye.push_back(cgmath::vec2(-0.52f, 2.51f));
 	left_eye.push_back(cgmath::vec2(-0.57f, 3.17f));
-	this->add_segment(left_eye);
+	this->add_segment(left_eye, true);
 
 
 	std::vector<cgmath::vec2> left_pupil;
@@ -182,18 +188,18 @@ void scene_chaikin::init() {
 	left_pupil.push_back(cgmath::vec2(-0.18f, 3.07f));
 	left_pupil.push_back(cgmath::vec2(-0.23f, 3.14f));
 	left_pupil.push_back(cgmath::vec2(-0.15f, 3.16f));
-	this->add_segment(left_pupil);
+	this->add_segment(left_pupil, true);
 
 
 	std::vector<cgmath::vec2> right_eye;
 	right_eye.push_back(cgmath::vec2(0.55f, 3.22f));
 	right_eye.push_back(cgmath::vec2(1.18f, 3.23f));
 	right_eye.push_back(cgmath::vec2(1.53f, 2.86f));
-	right_eye.push_back(cgmath::vec2(1.34f, 2.35f));
-	right_eye.push_back(cgmath::vec2(0.46f, 2.34f));
+	right_eye.push_back(cgmath::vec2(1.34f, 2.30f));
+	right_eye.push_back(cgmath::vec2(0.46f, 2.30f));
 	right_eye.push_back(cgmath::vec2(0.38f, 2.72f));
 	right_eye.push_back(cgmath::vec2(0.55f, 3.22f));
-	this->add_segment(right_eye);
+	this->add_segment(right_eye, true);
 
 	std::vector<cgmath::vec2> right_pupil;
 	right_pupil.push_back(cgmath::vec2(0.98f, 2.83f));
@@ -201,24 +207,172 @@ void scene_chaikin::init() {
 	right_pupil.push_back(cgmath::vec2(0.96f, 2.65f));
 	right_pupil.push_back(cgmath::vec2(0.88f, 2.72f));
 	right_pupil.push_back(cgmath::vec2(0.98f, 2.83f));
-	this->add_segment(right_pupil);
+	this->add_segment(right_pupil, true);
 
 	std::vector<cgmath::vec2> nose;
 	nose.push_back(cgmath::vec2(0.13f, 2.53f));
 	nose.push_back(cgmath::vec2(-0.03f, 2.31f));
-	//nose.push_back(cgmath::vec2(-0.08, 2.24f));
 	nose.push_back(cgmath::vec2(-0.07f, 2.16f));
 	nose.push_back(cgmath::vec2(-0.02f, 1.91f));
 	nose.push_back(cgmath::vec2(0.33f, 2.28f));
-	this->add_segment(nose);
+	this->add_segment(nose, false);
 
 	std::vector<cgmath::vec2> left_eyebag;
 	left_eyebag.push_back(cgmath::vec2(-0.55, 2.6f));
 	left_eyebag.push_back(cgmath::vec2(-0.43f, 2.43f));
 	left_eyebag.push_back(cgmath::vec2(-0.15f, 2.4f));
-	this->add_segment(left_eyebag);
+	this->add_segment(left_eyebag, false);
 
+	std::vector<cgmath::vec2> right_eyebag;
+	right_eyebag.push_back(cgmath::vec2(0.57, 2.2f));
+	right_eyebag.push_back(cgmath::vec2(0.94, 2.05f));
+	right_eyebag.push_back(cgmath::vec2(1.2f, 2.15f));
+	this->add_segment(right_eyebag, false);
 
+	std::vector<cgmath::vec2> left_mouth_wrinkle;
+	left_mouth_wrinkle.push_back(cgmath::vec2(-0.52, 1.22f));
+	left_mouth_wrinkle.push_back(cgmath::vec2(-0.76, 1.37f));
+	left_mouth_wrinkle.push_back(cgmath::vec2(-1.06, 1.75f));
+	left_mouth_wrinkle.push_back(cgmath::vec2(-1.05, 2.33f));
+	left_mouth_wrinkle.push_back(cgmath::vec2(-0.68, 2.45f));
+	left_mouth_wrinkle.push_back(cgmath::vec2(-0.45, 2.4f));
+	left_mouth_wrinkle.push_back(cgmath::vec2(-0.37, 2.32f));
+	this->add_segment(left_mouth_wrinkle, false);
+
+	std::vector<cgmath::vec2> right_mouth_wrinkle {
+		{1.07, 1.80f},
+		{1.22, 1.67f},
+		{1.37, 1.27f},
+		{1.02, 0.89f},
+		{0.66, 0.84f}
+	};
+	this->add_segment(right_mouth_wrinkle, false);
+
+	std::vector<cgmath::vec2> mouth {
+		{-0.77f, 1.41f},
+		{0.29f, 0.93f},
+		{1.15f, 1.03f},
+		{1.19f, 1.62f},
+		{0.63f, 1.91f},
+		{0.01, 1.84},
+		{-0.65f, 2.4f},
+		{-0.98, 2.05},
+		{-0.77f, 1.41f},
+	};
+	this->add_segment(mouth, true);
+
+	std::vector<cgmath::vec2> toungue {
+		{0.63f, 1.0f},
+		{0.52f, 1.31f},
+		{0.12f, 1.51f},
+		{0.64f, 1.54f},
+		{0.78f, 1.2f},
+		{0.8f, 1.04f}
+	};
+	this->add_segment(toungue, false);
+
+	std::vector<cgmath::vec2> l_tooth_0{
+		{-0.73, 1.53f},
+		{-0.67f, 1.56f},
+		{-0.59f, 1.5f},
+		{-0.6f, 1.39f},
+	};
+	this->add_segment(l_tooth_0, false);
+
+	std::vector<cgmath::vec2> l_tooth_1{
+		{-0.56, 1.37f},
+		{-0.44f, 1.51f},
+		{-0.42f, 1.27f},
+	};
+	this->add_segment(l_tooth_1, false);
+
+	std::vector<cgmath::vec2> l_tooth_2{
+		{-0.4, 1.27f},
+		{-0.26f, 1.45f},
+		{-0.22f, 1.19f},
+	};
+	this->add_segment(l_tooth_2, false);
+
+	std::vector<cgmath::vec2> l_tooth_3{
+		{-0.2, 1.17f},
+		{-0.06f, 1.36f},
+		{-0.02f, 1.09f},
+	};
+	this->add_segment(l_tooth_3, false);
+
+	std::vector<cgmath::vec2> l_tooth_4{
+		{-0.01, 1.09f},
+		{0.15, 1.27f},
+		{0.2f, 1.03f},
+	};
+	this->add_segment(l_tooth_4, false);
+
+	std::vector<cgmath::vec2> l_tooth_5{
+		{0.24, 1.01f},
+		{0.36, 1.26f},
+		{0.45f, 0.99f},
+	};
+	this->add_segment(l_tooth_5, false);
+
+	std::vector<cgmath::vec2> l_tooth_6{
+		{0.47, 0.99f},
+		{0.53, 1.15f},
+		{0.6f, 0.99f},
+	};
+	this->add_segment(l_tooth_6, false);
+
+	std::vector<cgmath::vec2> u_tooth_0{
+		{-0.51, 2.25f},
+		{-0.51, 2.12f},
+		{-0.38f, 2.15f},
+	};
+	this->add_segment(u_tooth_0, false);
+
+	std::vector<cgmath::vec2> u_tooth_1{
+		{-0.36, 2.13f},
+		{-0.39, 1.94f},
+		{-0.19f, 1.99f},
+	};
+	this->add_segment(u_tooth_1, false);
+
+	std::vector<cgmath::vec2> u_tooth_2{
+		{-0.17, 1.97f},
+		{-0.23, 1.9f},
+		{-0.23f, 1.76f},
+		{-0.1f, 1.78f},
+		{-0.01f, 1.89f},
+	};
+	this->add_segment(u_tooth_2, false);
+
+	std::vector<cgmath::vec2> u_tooth_3{
+		{-0.01, 1.89f},
+		{-0.03, 1.75f},
+		{0.02f, 1.68f},
+		{0.09f, 1.74f},
+		{0.12f, 1.9f},
+	};
+	this->add_segment(u_tooth_3, false);
+
+	std::vector<cgmath::vec2> u_tooth_4{
+		{0.15, 1.85f},
+		{0.25, 1.67f},
+		{0.36f, 1.88f},
+	};
+	this->add_segment(u_tooth_4, false);
+
+	std::vector<cgmath::vec2> u_tooth_5{
+		{0.37, 1.86f},
+		{0.47, 1.69f},
+		{0.58f, 1.86f},
+	};
+	this->add_segment(u_tooth_5, false);
+
+	std::vector<cgmath::vec2> u_tooth_6{
+		{0.6f, 1.86f},
+		{0.71f, 1.77f},
+		{0.78f, 1.81f},
+	};
+	this->add_segment(u_tooth_6, false);
 
 	v = orig;
 
@@ -236,12 +390,14 @@ void scene_chaikin::awake() {
 
 void scene_chaikin::mainLoop() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	glBindVertexArray(vao); 
-	{
-		glMultiDrawArrays(primitiveType, firsts.data(), counts.data(), counts.size());
+	if (curved) {
+		glBindVertexArray(vao);
+		{
+			glMultiDrawArrays(primitiveType, firsts.data(), counts.data(), counts.size());
+		}
+		glBindVertexArray(0);
 	}
-	glBindVertexArray(0);
+	
 
 	if (dotted) {
 		glBindVertexArray(dotsVAO);
@@ -267,5 +423,8 @@ void scene_chaikin::normalKeysDown(unsigned char key) {
 	}
 	if (key == 'd') {
 		dotted = !dotted;
+	}
+	if (key == 'c') {
+		curved = !curved;
 	}
 }

@@ -1,12 +1,6 @@
 #include <vector>
 #include "scene_primitives.h"
 #include "vec2.h"
-#include "..\include\scene_vertex.h"
-
-scene_vertex::~scene_vertex()
-{
-
-}
 
 void scene_primitives::init() {
 

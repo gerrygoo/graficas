@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -94,6 +94,7 @@
     <ClCompile Include="src\scene_chaikin.cpp" />
     <ClCompile Include="src\scene_compatibility.cpp" />
     <ClCompile Include="src\scene_conchoid.cpp" />
+    <ClCompile Include="src\scene_fragment.cpp" />
     <ClCompile Include="src\scene_manager.cpp" />
     <ClCompile Include="src\scene_primitives.cpp" />
     <ClCompile Include="src\scene_vertex.cpp" />
@@ -111,9 +112,16 @@
     <ClInclude Include="include\scene_chaikin.h" />
     <ClInclude Include="include\scene_compatibility.h" />
     <ClInclude Include="include\scene_conchoid.h" />
+    <ClInclude Include="include\scene_fragment.h" />
     <ClInclude Include="include\scene_manager.h" />
     <ClInclude Include="include\scene_primitives.h" />
     <ClInclude Include="include\scene_vertex.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\coco.frag" />
+    <None Include="shaders\coco.vert" />
+    <None Include="shaders\grid.vert" />
+    <None Include="shaders\solid_color.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

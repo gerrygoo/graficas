@@ -13,9 +13,9 @@ public:
 	void initDots();
 	void densifyDots(int);
 
-	void chaikinize(bool);
+	void chaikinize();
 
-	void add_segment(std::vector<cgmath::vec2>&);
+	void add_segment(std::vector<cgmath::vec2>&, bool);
 
 	void awake();
 	void sleep() { }
@@ -36,7 +36,11 @@ private:
 
 	GLenum primitiveType;
 
+	bool curved;
 	bool dotted;
+
+	std::vector<bool> inaloop;
+
 	std::vector<cgmath::vec2> orig;
 	std::vector<int> o_firsts;
 	std::vector<int> o_counts;
