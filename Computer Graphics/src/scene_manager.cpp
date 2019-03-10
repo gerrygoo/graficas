@@ -95,8 +95,8 @@ void scene_manager::initialize()
 	std::unique_ptr<scene> scene2(new scene_chaikin);
 	sceneList.push_back(std::move(scene2));
 
-	//std::unique_ptr<scene> scene3(new scene_vertex);
-	//sceneList.push_back(std::move(scene3));
+	std::unique_ptr<scene> scene3(new scene_conchoid);
+	sceneList.push_back(std::move(scene3));
 
 	for (auto& s : sceneList)
 		s->init();

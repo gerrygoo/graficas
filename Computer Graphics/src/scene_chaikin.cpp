@@ -139,7 +139,7 @@ void scene_chaikin::add_segment(std::vector<cgmath::vec2>& segment, bool loopy) 
 
 void scene_chaikin::init() {
 	primitiveType = GL_LINE_STRIP;
-	dotted = false;
+	dotted = true;
 	curved = true;
 
 	std::vector<cgmath::vec2> pickle;
@@ -378,6 +378,8 @@ void scene_chaikin::init() {
 
 	this->densifyDots(10);
 	this->initDots();
+
+	this->chaikinize(); // perform at least one refinement
 	
 	this->initVAO();
 	this->defineVAO();
