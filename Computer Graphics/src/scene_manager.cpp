@@ -2,7 +2,8 @@
 #include "scene_primitives.h"
 #include "scene_conchoid.h"
 #include "scene_chaikin.h"
-#include "scene_vertex.h"
+
+#include "scene_circle_grid.h"
 #include "scene_fragment.h"
 
 
@@ -92,11 +93,14 @@ void scene_manager::initialize()
 	// std::unique_ptr<scene> scene1(new scene_compatibility);
 	// sceneList.push_back(std::move(scene1));
 
-	std::unique_ptr<scene> scene2(new scene_chaikin);
-	sceneList.push_back(std::move(scene2));
+	// std::unique_ptr<scene> scene2(new scene_chaikin);
+	// sceneList.push_back(std::move(scene2));
 
-	std::unique_ptr<scene> scene3(new scene_conchoid);
-	sceneList.push_back(std::move(scene3));
+	// std::unique_ptr<scene> scene3(new scene_conchoid);
+	// sceneList.push_back(std::move(scene3));
+
+	std::unique_ptr<scene> scene4(new scene_circle_grid);
+	sceneList.push_back(std::move(scene4));
 
 	for (auto& s : sceneList)
 		s->init();

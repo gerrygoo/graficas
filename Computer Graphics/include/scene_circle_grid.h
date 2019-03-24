@@ -2,9 +2,9 @@
 
 #include "scene.h"
 
-class scene_vertex : public scene {
+class scene_circle_grid : public scene {
 public:
-	~scene_vertex();
+	~scene_circle_grid();
 	void init();
 	void awake();
 	void sleep();
@@ -19,7 +19,5 @@ public:
 private:
 	GLuint shader_program;
 
-	std::vector<int> starts;
-	std::vector<int> counts;
 	int t;
 };

@@ -25,3 +25,4 @@ void main(){
   gl_PointSize = 20.0f;
   InterpolatedColor = vec4(sin(time) * 0.5f, sin(x), cos(x), 1.0f);
 }
+

@@ -92,6 +92,7 @@
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\scene_chaikin.cpp" />
+    <ClCompile Include="src\scene_circle_grid.cpp" />
     <ClCompile Include="src\scene_compatibility.cpp" />
     <ClCompile Include="src\scene_conchoid.cpp" />
     <ClCompile Include="src\scene_fragment.cpp" />
@@ -110,6 +111,7 @@
   <ItemGroup>
     <ClInclude Include="include\scene.h" />
     <ClInclude Include="include\scene_chaikin.h" />
+    <ClInclude Include="include\scene_circle_grid.h" />
     <ClInclude Include="include\scene_compatibility.h" />
     <ClInclude Include="include\scene_conchoid.h" />
     <ClInclude Include="include\scene_fragment.h" />
@@ -118,6 +120,7 @@
     <ClInclude Include="include\scene_vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\circle_grid.vert" />
     <None Include="shaders\coco.frag" />
     <None Include="shaders\coco.vert" />
     <None Include="shaders\grid.vert" />
