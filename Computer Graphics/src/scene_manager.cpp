@@ -5,6 +5,7 @@
 
 #include "scene_circle_grid.h"
 #include "scene_fragment.h"
+#include "scene_sphere.h"
 
 
 #include <iostream>
@@ -101,6 +102,9 @@ void scene_manager::initialize()
 
 	std::unique_ptr<scene> scene4(new scene_circle_grid);
 	sceneList.push_back(std::move(scene4));
+
+	std::unique_ptr<scene> scene5(new scene_sphere);
+	sceneList.push_back(std::move(scene5));
 
 	for (auto& s : sceneList)
 		s->init();

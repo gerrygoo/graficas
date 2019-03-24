@@ -2,19 +2,19 @@
 #include <iostream>
 
 
-#include "scene_circle_grid.h"
+#include "scene_sphere.h"
 #include "ifile.h"
 #include "time_util.h"
 
 
-scene_circle_grid::~scene_circle_grid() {
+scene_sphere::~scene_sphere() {
 	glDeleteProgram(shader_program);
 }
 
-void scene_circle_grid::init() {
+void scene_sphere::init() {
 	ifile shader_file;
 
-	shader_file.read("shaders/circle_grid.vert");
+	shader_file.read("shaders/sphere.vert");
 	std::string vertex_source = shader_file.get_contents();
 	const GLchar* vertex_source_c = (const GLchar*)vertex_source.c_str();
 
@@ -65,21 +65,19 @@ void scene_circle_grid::init() {
 
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader);
-
-	t = 62;
 }
 
-void scene_circle_grid::awake() {
+void scene_sphere::awake() {
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glEnable(GL_PROGRAM_POINT_SIZE);
 }
 
-void scene_circle_grid::sleep() {
+void scene_sphere::sleep() {
 	glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
 	glDisable(GL_PROGRAM_POINT_SIZE);
 }
 
-void scene_circle_grid::mainLoop() {
+void scene_sphere::mainLoop() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(shader_program);
@@ -87,14 +85,19 @@ void scene_circle_grid::mainLoop() {
 		GLuint time_location = glGetUniformLocation(shader_program, "time");
 		glUniform1f(time_location, time_util::elapsed_time().count());
 
-		for (int i = 0; i < 100; i++) glDrawArrays(GL_TRIANGLE_STRIP, (t * i), t);
+		glDrawArrays(GL_POINTS, 0, 10000);
+
+		/*glDrawArrays(GL_TRIANGLE_STRIP, 0, 62);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 62, 62);
+
+		glDrawArrays(GL_TRIANGLE_STRIP, 124, 62);*/
+
+		// glMultiDrawArrays(GL_TRIANGLE_STRIP, starts.data(), counts.data(), counts.size());
 	}
 	glUseProgram(0);
 }
 
-void scene_circle_grid::resize(int width, int height) { }
-
-void scene_circle_grid::normalKeysDown(unsigned char key) {
-	if (key == '1') t++;
-	if (key == '2') t--;
+void scene_sphere::resize(int width, int height)
+{
 }
