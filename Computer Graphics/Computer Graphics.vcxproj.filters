@@ -45,6 +45,9 @@
     <ClCompile Include="src\scene_sphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene_circle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\scene_manager.h">
@@ -77,6 +80,9 @@
     <ClInclude Include="include\scene_sphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\scene_circle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\grid.vert" />
@@ -85,5 +91,7 @@
     <None Include="shaders\coco.vert" />
     <None Include="shaders\circle_grid.vert" />
     <None Include="shaders\sphere.vert" />
+    <None Include="shaders\circle.vert" />
+    <None Include="shaders\circle.frag" />
   </ItemGroup>
 </Project>
