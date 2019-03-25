@@ -82,8 +82,7 @@ void scene_sphere::mainLoop() {
 
 	glUseProgram(shader_program);
 	{
-		GLuint time_location = glGetUniformLocation(shader_program, "time");
-		glUniform1f(time_location, time_util::elapsed_time().count());
+		glUniform1f(glGetUniformLocation(shader_program, "time"), time_util::elapsed_time().count());
 
 		glDrawArrays(GL_POINTS, 0, 10000);
 

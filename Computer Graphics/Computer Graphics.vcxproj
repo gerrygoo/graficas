@@ -96,6 +96,7 @@
     <ClCompile Include="src\scene_circle_grid.cpp" />
     <ClCompile Include="src\scene_compatibility.cpp" />
     <ClCompile Include="src\scene_conchoid.cpp" />
+    <ClCompile Include="src\scene_cube.cpp" />
     <ClCompile Include="src\scene_fragment.cpp" />
     <ClCompile Include="src\scene_manager.cpp" />
     <ClCompile Include="src\scene_primitives.cpp" />
@@ -117,6 +118,7 @@
     <ClInclude Include="include\scene_circle_grid.h" />
     <ClInclude Include="include\scene_compatibility.h" />
     <ClInclude Include="include\scene_conchoid.h" />
+    <ClInclude Include="include\scene_cube.h" />
     <ClInclude Include="include\scene_fragment.h" />
     <ClInclude Include="include\scene_manager.h" />
     <ClInclude Include="include\scene_primitives.h" />
@@ -129,7 +131,10 @@
     <None Include="shaders\circle_grid.vert" />
     <None Include="shaders\coco.frag" />
     <None Include="shaders\coco.vert" />
+    <None Include="shaders\cube.frag" />
+    <None Include="shaders\cube.vert" />
     <None Include="shaders\grid.vert" />
+    <None Include="shaders\simple_pass.vert" />
     <None Include="shaders\solid_color.frag" />
     <None Include="shaders\sphere.vert" />
   </ItemGroup>
