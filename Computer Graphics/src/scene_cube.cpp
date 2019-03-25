@@ -81,13 +81,6 @@ void scene_cube::setup_shaders() {
 	glBindAttribLocation(shader_program, 1, "VertexColor");
 
 	glLinkProgram(shader_program);
-
-	glUseProgram(shader_program);
-	{
-		glUniform2f(glGetUniformLocation(shader_program, "iResolution"), 400.0f, 400.0f);
-	}
-	glUseProgram(0);
-
 	glDeleteShader(vertex_shader);
 	glDeleteShader(fragment_shader);
 }
@@ -97,112 +90,130 @@ void scene_cube::init() {
 
 	auto blue = cgmath::vec3(66.0f, 134.0f, 244.0f)/255.0f;
 	auto orange = cgmath::vec3(244.0f, 152.0f, 65.0f) / 255.0f;
+	
 	auto white = cgmath::vec3(255.0f, 250.0f, 230.0f) / 255.0f;
+	// auto white = cgmath::vec3(244, 66, 238) / 255.0f;
 	auto green = cgmath::vec3(98.0f, 196.0f, 53.0f) / 255.0f;
 	auto yellow = cgmath::vec3(255.0f, 243.0f, 89.0f) / 255.0f;
 	auto red = cgmath::vec3(249.0f, 89.0f, 89.0f) / 255.0f;
 
 	// +z axis outwards, towards 'me' 
+	float p3 = 3.0f;
+	float m3 = -3.0f;
 	
+	auto utl = cgmath::vec3(m3, p3, m3);
+	auto utr = cgmath::vec3(p3, p3, m3);
+	auto ubr = cgmath::vec3(p3, p3, p3);
+	auto ubl = cgmath::vec3(m3, p3, p3);
+
+	auto dtl = cgmath::vec3(m3, m3, m3);
+	auto dtr = cgmath::vec3(p3, m3, m3);
+	auto dbr = cgmath::vec3(p3, m3, p3);
+	auto dbl = cgmath::vec3(m3, m3, p3);
+
+	int s;
+
 	// F - 0
-	positions.push_back(cgmath::vec3({ -3.0f, 3.0f, 3.0f }));
-	positions.push_back(cgmath::vec3({ 3.0f, 3.0f, 3.0f }));
-	positions.push_back(cgmath::vec3({ 3.0f, -3.0f, 3.0f }));
-	positions.push_back(cgmath::vec3({ -3.0f, -3.0f, 3.0f }));
+	s = positions.size();
+	positions.push_back(ubl);
+	positions.push_back(ubr);
+	positions.push_back(dbr);
+	positions.push_back(dbl);
 
-	for (int i = 0; i < 4; i++) colors.push_back(blue);
+	for (int i = 0; i < 4; i++) colors.push_back(red);
 
-	idxes.push_back(0);
-	idxes.push_back(3);
-	idxes.push_back(1);
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 1);
+	idxes.push_back(s);
 
-	idxes.push_back(1);
-	idxes.push_back(3);
-	idxes.push_back(2);
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 2);
+	idxes.push_back(s + 1);
 
 	// L - 4
-	positions.push_back(cgmath::vec3({-3.0f, 3.0f, -3.0f }));
-	positions.push_back(cgmath::vec3({ -3.0f, 3.0f, 3.0f }));
-	positions.push_back(cgmath::vec3({ -3.0f, -3.0f, 3.0f }));
-	positions.push_back(cgmath::vec3({ -3.0f, -3.0f, -3.0f }));
-
-	for (int i = 0; i < 4; i++) colors.push_back(white);
-
-	idxes.push_back(4);
-	idxes.push_back(7);
-	idxes.push_back(5);
-
-	idxes.push_back(5);
-	idxes.push_back(7);
-	idxes.push_back(6);
-
-	// R - 8
-	positions.push_back(cgmath::vec3({ 3.0f, 3.0f, 3.0f }));
-	positions.push_back(cgmath::vec3({ 3.0f, 3.0f, -3.0f }));
-	positions.push_back(cgmath::vec3({ 3.0f, -3.0f, -3.0f }));
-	positions.push_back(cgmath::vec3({ 3.0f, -3.0f, 3.0f }));
-
-	for (int i = 0; i < 4; i++) colors.push_back(orange);
-
-	idxes.push_back(8);
-	idxes.push_back(11);
-	idxes.push_back(9);
-
-	idxes.push_back(9);
-	idxes.push_back(11);
-	idxes.push_back(10);
-
-
-	// D - 12
-	positions.push_back(cgmath::vec3({ -3.0f, -3.0f, 3.0f }));
-	positions.push_back(cgmath::vec3({ 3.0f, -3.0f, 3.0f }));
-	positions.push_back(cgmath::vec3({ 3.0f, -3.0f, -3.0f }));
-	positions.push_back(cgmath::vec3({ -3.0f, -3.0f, -3.0f }));
+	s = positions.size();
+	positions.push_back(utl);
+	positions.push_back(ubl);
+	positions.push_back(dbl);
+	positions.push_back(dtl);
 
 	for (int i = 0; i < 4; i++) colors.push_back(green);
 
-	idxes.push_back(12);
-	idxes.push_back(15);
-	idxes.push_back(13);
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 1);
+	idxes.push_back(s);
 
-	idxes.push_back(13);
-	idxes.push_back(15);
-	idxes.push_back(14);
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 2);
+	idxes.push_back(s + 1);
 
-	// U - 16
-	positions.push_back(cgmath::vec3({ -3.0f, 3.0f, -3.0f }));
-	positions.push_back(cgmath::vec3({ 3.0f, 3.0f, -3.0f }));
-	positions.push_back(cgmath::vec3({ 3.0f, 3.0f, 3.0f }));
-	positions.push_back(cgmath::vec3({ -3.0f, 3.0f, 3.0f }));
-	
-	for (int i = 0; i < 4; i++) colors.push_back(red);
+	// R - 8
+	s = positions.size();
+	positions.push_back(ubr);
+	positions.push_back(utr);
+	positions.push_back(dtr);
+	positions.push_back(dbr);
 
-	idxes.push_back(16);
-	idxes.push_back(19);
-	idxes.push_back(17);
+	for (int i = 0; i < 4; i++) colors.push_back(blue);
 
-	idxes.push_back(17);
-	idxes.push_back(19);
-	idxes.push_back(18);
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 1);
+	idxes.push_back(s);
 
-	// B - 20
-	positions.push_back(cgmath::vec3({ 3.0f, 3.0f, -3.0f }));
-	positions.push_back(cgmath::vec3({ -3.0f, 3.0f, -3.0f }));
-	positions.push_back(cgmath::vec3({ -3.0f, -3.0f, -3.0f }));
-	positions.push_back(cgmath::vec3({ 3.0f, -3.0f, -3.0f }));
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 2);
+	idxes.push_back(s + 1);
 
+	// D - 12
+	s = positions.size();
+	positions.push_back(dbl);
+	positions.push_back(dbr);
+	positions.push_back(dtr);
+	positions.push_back(dtl);
 
 	for (int i = 0; i < 4; i++) colors.push_back(yellow);
 
-	std::cout << positions.size() << "   " << colors.size();
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 1);
+	idxes.push_back(s);
 
-	idxes.push_back(20);
-	idxes.push_back(23);
-	idxes.push_back(21);
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 2);
+	idxes.push_back(s + 1);
 
-	idxes.push_back(21);
-	idxes.push_back(23);
-	idxes.push_back(22);
+	// U - 16
+	s = positions.size();
+	positions.push_back(utl);
+	positions.push_back(utr);
+	positions.push_back(ubr);
+	positions.push_back(ubl);
+
+	for (int i = 0; i < 4; i++) colors.push_back(white);
+
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 1);
+	idxes.push_back(s);
+
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 2);
+	idxes.push_back(s + 1);
+
+	// B - 20
+	s = positions.size();
+	positions.push_back(utr);
+	positions.push_back(utl);
+	positions.push_back(dtl);
+	positions.push_back(dtr);
+
+	for (int i = 0; i < 4; i++) colors.push_back(orange);
+
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 1);
+	idxes.push_back(s);
+
+	idxes.push_back(s + 3);
+	idxes.push_back(s + 2);
+	idxes.push_back(s + 1);
 
 	glGenVertexArrays(1, &p_vao);
 	glBindVertexArray(p_vao);
@@ -211,7 +222,7 @@ void scene_cube::init() {
 		glGenBuffers(1, &p_vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, p_vbo);
 		{
-			glBufferData(GL_ARRAY_BUFFER, sizeof cgmath::vec2 * positions.size(), positions.data(), GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof cgmath::vec3 * positions.size(), positions.data(), GL_STATIC_DRAW);
 
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
@@ -247,55 +258,49 @@ void scene_cube::mainLoop() {
 		// 'static' uniforms
 		auto camera_model = cgmath::mat4(1.0f);
 		camera_model[3][2] = 10.0f;
-
 		auto view_m = cgmath::mat4::inverse(camera_model);
 
-		float t = time_util::elapsed_time().count();
+		float t = time_util::elapsed_time().count() / 1;
 		auto model_m = (
 			cgmath::mat4({
 				{cos(30.0f * DEG_RAD * t), sin(30.0f * DEG_RAD * t), 0.0f, 0.0f},
 				{-sin(30.0f * DEG_RAD * t), cos(30.0f * DEG_RAD * t), 0.0f, 0.0f},
 				{0.0f, 0.0f, 1.0f, 0.0f},
 				{0.0f, 0.0f, 0.0f, 1.0f},
-				}) *
-				cgmath::mat4({
-					{cos(60.0f * DEG_RAD * t), 0.0f, -sin(60.0f * DEG_RAD * t), 0.0f},
-					{0.0f, 1.0f, 0.0f, 0.0f},
-					{sin(60.0f * DEG_RAD * t), 0.0f, cos(60.0f * DEG_RAD * t), 0.0f},
-					{0.0f, 0.0f, 0.0f, 1.0f},
-					}) *
-					cgmath::mat4({
-						{1.0f, 0.0f, 0.0f, 0.0f},
-						{0.0f, cos(30 * DEG_RAD * t), sin(30.0f * DEG_RAD * t), 0.0f},
-						{0.0f, -sin(30 * DEG_RAD * t), cos(30.0f * DEG_RAD * t), 0.0f},
-						{0.0f, 0.0f, 0.0f, 1.0f},
-						})
-						);
+			}) *
+			cgmath::mat4({
+				{cos(60.0f * DEG_RAD * t), 0.0f, -sin(60.0f * DEG_RAD * t), 0.0f},
+				{0.0f, 1.0f, 0.0f, 0.0f},
+				{sin(60.0f * DEG_RAD * t), 0.0f, cos(60.0f * DEG_RAD * t), 0.0f},
+				{0.0f, 0.0f, 0.0f, 1.0f},
+			}) *
+			cgmath::mat4({
+				{1.0f, 0.0f, 0.0f, 0.0f},
+				{0.0f, cos(30 * DEG_RAD * t), sin(30.0f * DEG_RAD * t), 0.0f},
+				{0.0f, -sin(30 * DEG_RAD * t), cos(30.0f * DEG_RAD * t), 0.0f},
+				{0.0f, 0.0f, 0.0f, 1.0f},
+			})
+		);
 
 		float
-			aspect = 1.0f,
 			far = 1000.0f,
 			near = 1.0f,
 			fov = 60 * DEG_RAD;
 
 		auto proj_m = cgmath::mat4({
 			{1.0f / (aspect * tan(fov / 2.0f)), 0.0f, 0.0f, 0.0f},
-			{0.0f, 1 / tan(fov / 2.0f), 0.0f, 0.0f},
-			{0.0f, 0.0f, -(far + near) / (far - near), -1.0f},
-			{0.0f, 0.0f, -(2.0f * far * near) / (far - near), 0.0f},
-			});
+			{0.0f, 1.0f / tan(fov / 2.0f), 0.0f, 0.0f},
+			{0.0f, 0.0f, -((far + near) / (far - near)), -1.0f},
+			{0.0f, 0.0f, -((2.0f * far * near) / (far - near)), 1.0f},
+		});
 
-		auto mvp = (
-			proj_m
-			* view_m
-			* model_m
-		);
+		auto mvp = ( proj_m * view_m * model_m );
 
-		glUniform1f(glGetUniformLocation(shader_program, "iTime"), time_util::elapsed_time().count());
 		glUniformMatrix4fv(glGetUniformLocation(shader_program, "mvp"), 1, GL_FALSE, &mvp[0][0]);
 		glBindVertexArray(p_vao);
 		{
 			glDrawElements(GL_TRIANGLES, idxes.size(), GL_UNSIGNED_INT, nullptr);
+			// glDrawElements(GL_POINTS, idxes.size(), GL_UNSIGNED_INT, nullptr);
 		}
 		glBindVertexArray(0);
 	}
@@ -303,8 +308,6 @@ void scene_cube::mainLoop() {
 }
 
 void scene_cube::resize(int width, int height) {
+	aspect = (float)width / (float)height;
 	glViewport(0, 0, width, height);
-	glUseProgram(shader_program);
-	glUniform2f(glGetUniformLocation(shader_program, "iResolution"), width, height);
-	glUseProgram(0);
 }

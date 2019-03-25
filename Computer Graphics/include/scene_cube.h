@@ -25,6 +25,8 @@ private:
 
 	GLuint p_vao, p_vbo, c_vbo, i_vbo;
 
+	float aspect;
+
 	std::vector<cgmath::vec3> positions;
 	std::vector<cgmath::vec3> colors;
 	std::vector<GLuint> idxes;
