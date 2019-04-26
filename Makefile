@@ -15,7 +15,7 @@ INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 # LDFLAGS += -llua
 
-CPPFLAGS += $(INC_FLAGS) -MMD -MP
+CPPFLAGS += $(INC_FLAGS) -MMD -MP -g
 CXXFLAGS += -std=c++11
 CFLAGS += -std=c11
 
@@ -51,7 +51,6 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 .PHONY: clean
 clean:
 	$(RM) -r $(BUILD_DIR)
-	$(RM) $(TARGET_EXEC)
 
 -include $(DEPS)
 
