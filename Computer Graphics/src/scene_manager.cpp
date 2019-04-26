@@ -10,12 +10,13 @@
 #include "scene_sphere.h"
 #include "scene_circle.h"
 #include "scene_cube.h"
+#include "scene_textures.h"
 
 
 #include <iostream>
-
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <IL/il.h>
 
 #include "scene.h"
 #include "scene_compatibility.h"
@@ -28,6 +29,9 @@ void scene_manager::start(int argc, char* argv[], const std::string& name, int w
 {
 	// Time init
 	time_util::init();
+	ilInit();
+	ilEnable(IL_ORIGIN_SET);
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 
 	// Freeglut init
 	glutInit(&argc, argv);
@@ -113,8 +117,12 @@ void scene_manager::initialize()
 	//std::unique_ptr<scene> scene6(new scene_circle);
 	//sceneList.push_back(std::move(scene6));
 
-	std::unique_ptr<scene> scene7(new scene_cube);
-	sceneList.push_back(std::move(scene7));
+	//std::unique_ptr<scene> scene7(new scene_cube);
+	//sceneList.push_back(std::move(scene7));
+
+	std::unique_ptr<scene> scene8(new scene_textures);
+	sceneList.push_back(std::move(scene8));
+
 
 	for (auto& s : sceneList)
 		s->init();

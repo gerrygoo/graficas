@@ -101,6 +101,7 @@
     <ClCompile Include="src\scene_manager.cpp" />
     <ClCompile Include="src\scene_primitives.cpp" />
     <ClCompile Include="src\scene_sphere.cpp" />
+    <ClCompile Include="src\scene_textures.cpp" />
     <ClCompile Include="src\scene_vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -123,6 +124,7 @@
     <ClInclude Include="include\scene_manager.h" />
     <ClInclude Include="include\scene_primitives.h" />
     <ClInclude Include="include\scene_sphere.h" />
+    <ClInclude Include="include\scene_textures.h" />
     <ClInclude Include="include\scene_vertex.h" />
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +139,14 @@
     <None Include="shaders\simple_pass.vert" />
     <None Include="shaders\solid_color.frag" />
     <None Include="shaders\sphere.vert" />
+    <None Include="shaders\textures.frag" />
+    <None Include="shaders\textures.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\crate.png" />
+    <Image Include="textures\metal.jpg" />
+    <Image Include="textures\lucina.jpg" />
+    <Image Include="textures\pig.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

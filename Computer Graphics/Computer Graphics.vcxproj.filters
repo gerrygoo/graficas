@@ -51,6 +51,9 @@
     <ClCompile Include="src\scene_cube.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\scene_textures.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\scene_manager.h">
@@ -89,6 +92,9 @@
     <ClInclude Include="include\scene_cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\scene_textures.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\grid.vert" />
@@ -102,5 +108,21 @@
     <None Include="shaders\cube.frag" />
     <None Include="shaders\cube.vert" />
     <None Include="shaders\simple_pass.vert" />
+    <None Include="shaders\textures.frag" />
+    <None Include="shaders\textures.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\metal.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\lucina.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\crate.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="textures\pig.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
