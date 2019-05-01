@@ -5,18 +5,19 @@ namespace cgmath {
     class vec3 {
         public:
             float x, y, z;
-            
+
             vec3(): x(), y(), z() { }
+            vec3(float s): x(s), y(s), z(s) { }
             vec3(float x, float y, float z): x(x), y(y), z(z) { }
 
-            
+
             float& operator[](int);
             const float& operator[](int) const;
 
             vec3& operator*=(float);
 
             vec3& operator/=(float);
-            
+
             vec3& operator+=(const vec3&);
 
             vec3& operator-=(const vec3&);

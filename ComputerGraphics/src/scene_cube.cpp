@@ -8,7 +8,6 @@
 
 #include "mat4.h"
 
-
 #define  PI_F 3.14159265358979f
 #define  DEG_RAD (PI_F / 180.0f)
 
@@ -90,17 +89,17 @@ void scene_cube::init() {
 
 	auto blue = cgmath::vec3(66.0f, 134.0f, 244.0f)/255.0f;
 	auto orange = cgmath::vec3(244.0f, 152.0f, 65.0f) / 255.0f;
-	
+
 	auto white = cgmath::vec3(255.0f, 250.0f, 230.0f) / 255.0f;
 	// auto white = cgmath::vec3(244, 66, 238) / 255.0f;
 	auto green = cgmath::vec3(98.0f, 196.0f, 53.0f) / 255.0f;
 	auto yellow = cgmath::vec3(255.0f, 243.0f, 89.0f) / 255.0f;
 	auto red = cgmath::vec3(249.0f, 89.0f, 89.0f) / 255.0f;
 
-	// +z axis outwards, towards 'me' 
+	// +z axis outwards, towards 'me'
 	float p3 = 3.0f;
 	float m3 = -3.0f;
-	
+
 	auto utl = cgmath::vec3(m3, p3, m3);
 	auto utr = cgmath::vec3(p3, p3, m3);
 	auto ubr = cgmath::vec3(p3, p3, p3);

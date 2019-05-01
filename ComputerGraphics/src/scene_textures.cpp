@@ -293,6 +293,8 @@ void scene_textures::init() {
 		idxes.push_back(s + 3);
 		idxes.push_back(s + 2);
 		idxes.push_back(s + 1);
+
+		aspect = 1.0f;
 	}
 
 	glGenVertexArrays(1, &p_vao);
@@ -302,7 +304,7 @@ void scene_textures::init() {
 		glGenBuffers(1, &p_vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, p_vbo);
 		{
-			glBufferData(GL_ARRAY_BUFFER, sizeof cgmath::vec3 * positions.size(), positions.data(), GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(cgmath::vec3) * positions.size(), positions.data(), GL_STATIC_DRAW);
 
 			glEnableVertexAttribArray(0);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
@@ -313,7 +315,7 @@ void scene_textures::init() {
 		glGenBuffers(1, &c_vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, c_vbo);
 		{
-			glBufferData(GL_ARRAY_BUFFER, sizeof cgmath::vec2 * texture_cordinates.size(), texture_cordinates.data(), GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(cgmath::vec2) * texture_cordinates.size(), texture_cordinates.data(), GL_DYNAMIC_DRAW);
 
 			glEnableVertexAttribArray(1);
 			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);

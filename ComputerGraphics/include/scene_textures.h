@@ -18,10 +18,9 @@ public:
 	void setup_textures();
 
 	void resize(int width, int height);
-	void normalKeysDown(unsigned char key) { }
-	void normalKeysUp(unsigned char key) { }
-	void specialKeys(int key) { };
-	void passiveMotion(int x, int y) { };
+	void keysDown(int key) {}
+    void keysUp(int key) {}
+	void passiveMotion(float x, float y) { };
 
 private:
 	GLuint shader_program;
