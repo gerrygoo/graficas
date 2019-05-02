@@ -6,7 +6,9 @@ build/ComputerGraphics/src/scene_manager.cpp.o: \
   Dependencies/include/GLFW/glfw3.h \
   ComputerGraphics/include/scene_cube.h Math/include/vec3.h \
   Math/include/vec2.h ComputerGraphics/include/scene_textures.h \
-  Util/include/time_util.h Dependencies/include/IL/il.h
+  ComputerGraphics/include/scene_particles.h Math/include/mat4.h \
+  Math/include/vec4.h Util/include/time_util.h \
+  Dependencies/include/IL/il.h
 
 ComputerGraphics/include/scene_manager.h:
 
@@ -25,6 +27,12 @@ Math/include/vec3.h:
 Math/include/vec2.h:
 
 ComputerGraphics/include/scene_textures.h:
+
+ComputerGraphics/include/scene_particles.h:
+
+Math/include/mat4.h:
+
+Math/include/vec4.h:
 
 Util/include/time_util.h:
 

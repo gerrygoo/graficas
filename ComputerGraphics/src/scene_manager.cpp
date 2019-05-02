@@ -2,6 +2,7 @@
 
 #include "scene_cube.h"
 #include "scene_textures.h"
+#include "scene_particles.h"
 
 #include "scene.h"
 #include "time_util.h"
@@ -97,11 +98,14 @@ void scene_manager::prev() {
 
 void scene_manager::initialize()
 {
-	std::unique_ptr<scene> scene7(new scene_cube);
-	sceneList.push_back(std::move(scene7));
+	// std::unique_ptr<scene> scene7(new scene_cube);
+	// sceneList.push_back(std::move(scene7));
 
-    std::unique_ptr<scene> scene8(new scene_textures);
-	sceneList.push_back(std::move(scene8));
+    // std::unique_ptr<scene> scene8(new scene_textures);
+	// sceneList.push_back(std::move(scene8));
+
+     std::unique_ptr<scene> scene9(new scene_particles);
+	sceneList.push_back(std::move(scene9));
 
 	for (auto& s : sceneList)
 		s->init();

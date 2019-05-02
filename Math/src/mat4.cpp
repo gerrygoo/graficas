@@ -36,6 +36,41 @@ namespace cgmath {
 		return inverse;
 	}
 
+	mat4 mat4::look_at(const vec3& eye, const vec3& center, const vec3& up) {
+		// https://stackoverflow.com/a/21830596
+		mat4 m;
+		vec3 X, Y, Z;
+		Z = eye - center;
+		Z.normalize();
+		Y = up;
+		X = vec3::cross(Y, Z);
+		Y = vec3::cross(Z, X);
+		X.normalize();
+		Y.normalize();
+
+		m[0][0] = X.x;
+		m[0][1] = X.y;
+		m[0][2] = X.z;
+		m[0][3] = vec3::dot(-X, eye);
+
+		m[1][0] = Y.x;
+		m[1][1] = Y.y;
+		m[1][2] = Y.z;
+		m[1][3] = vec3::dot(-Y, eye);
+
+		m[2][0] = Z.x;
+		m[2][1] = Z.y;
+		m[2][2] = Z.z;
+		m[2][3] = vec3::dot(-Z, eye);
+
+		m[3][0] = 0;
+		m[3][1] = 0;
+		m[3][2] = 0;
+		m[3][3] = 1.0f;
+
+		return m;
+	}
+
 	std::ostream& operator<<(std::ostream& o, const mat4& m) {
 		return o
 			<< m[0][0] << " " << m[1][0] << " " << m[2][0] << " " << m[3][0] << '\n'

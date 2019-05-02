@@ -1,14 +1,15 @@
 # pragma once
 
 #include "scene.h"
+#include "mat4.h"
 
 class scene_particles : public scene {
 public:
 	~scene_particles();
 	void init();
 	void mainLoop();
-	void awake() { }
-	void sleep() { }
+	void awake();
+	void sleep();
 	void reset() { }
     void keysDown(int key) {}
     void keysUp(int key) {}
@@ -23,6 +24,9 @@ public:
 	void setup_uniforms();
 	void setup_buffers();
 
+	void set_mvp_uniform();
+	void set_delta_time_uniform();
+
 private:
 	float aspect;
 
@@ -34,9 +38,12 @@ private:
 	GLuint delta_time_uniform_location;
 	GLuint acceleration_uniform_location;
 	GLuint time_to_live_uniform_location;
-	GLuint mvp_uniform_location;
 	GLuint render_subroutine_idx;
 	GLuint update_subroutine_idx;
+
+	GLuint mvp_uniform_location;
+	cgmath::mat4 model, view, projection;
+	float angle;
 
 
 	GLuint particle_vaos[2];
@@ -48,4 +55,6 @@ private:
 	GLuint velocity_buffers[2];
 	GLuint start_time_buffers[2];
 
+	int active_vao_idx;
+	float last_time, delta_time;
 };

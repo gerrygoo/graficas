@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include "vec4.h"
+#include "vec3.h"
 
 
 namespace cgmath {
@@ -20,6 +21,7 @@ namespace cgmath {
 		bool operator==(const mat4&) const;
 
 		static mat4 inverse(const mat4&);
+		static mat4 look_at(const vec3&, const vec3&, const vec3&);
 
 		friend std::ostream& operator<<(std::ostream&, const mat4&);
 	};
