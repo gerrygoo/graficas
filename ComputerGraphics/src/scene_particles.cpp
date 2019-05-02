@@ -132,7 +132,7 @@ void scene_particles::setup_buffers() {
 
         // initial fill, TODO simplify
 
-        // positions start at 0
+        // positions start at 0,0,0
         // TODO RANDOMIZE GIVEN SPAWN AREA UNIFORM ATTRS
         GLfloat *data = new GLfloat[particle_count * 3];
         for( int i = 0; i < particle_count * 3; i++ ) data[i] = 0.0f;
@@ -143,30 +143,29 @@ void scene_particles::setup_buffers() {
 
         // random angles for initial velocities
         // TODO RANDOMIZE GIVEN SPAWN AREA UNIFORM ATTRS
-        cgmath::vec3 v(0.0f);
-        float velocity, theta, phi;
-        for( int i = 0; i < particle_count; i++ ) {
-            theta = mix(0.0f, (float)PI / 6.0f, drand48());
-            phi = mix(0.0f, (float)TWOPI, drand48());
+        // cgmath::vec3 v(0.0f);
+        // float velocity, theta, phi;
+        // for( int i = 0; i < particle_count; i++ ) {
+        //     theta = mix(0.0f, (float)PI / 6.0f, drand48());
+        //     phi = mix(0.0f, (float)TWOPI, drand48());
 
-            v.x = sin(theta) * cos(phi);
-            v.y = cos(theta);
-            v.z = sin(theta) * sin(phi);
+        //     v.x = sin(theta) * cos(phi);
+        //     v.y = cos(theta);
+        //     v.z = sin(theta) * sin(phi);
 
-            velocity = mix(1.25f, 1.5f, drand48());
-            v.normalize();
-            v *= velocity;
+        //     velocity = mix(1.25f, 1.5f, drand48());
+        //     v.normalize();
+        //     v *= velocity;
 
-            data[3*i]   = v.x;
-            data[3*i+1] = v.y;
-            data[3*i+2] = v.z;
-        }
-        glBindBuffer(GL_ARRAY_BUFFER, velocity_buffers[0]);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_3f_buffer, data);
-
+        //     data[3*i]   = v.x;
+        //     data[3*i+1] = v.y;
+        //     data[3*i+2] = v.z;
+        // }
         glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_3f_buffer, data);
 
+        glBindBuffer(GL_ARRAY_BUFFER, velocity_buffers[0]);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_3f_buffer, data);
 
         delete [] data;
         data = new GLfloat[particle_count];
@@ -177,7 +176,7 @@ void scene_particles::setup_buffers() {
             time += rate;
         }
         glBindBuffer(GL_ARRAY_BUFFER, start_time_buffers[0]);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, particle_count * sizeof(float), data);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_1f_buffer, data);
         delete [] data;
 
         glBindBuffer(GL_ARRAY_BUFFER,0);
@@ -209,8 +208,8 @@ void scene_particles::setup_buffers() {
     for (int i = 0; i < 2; i++) {
         glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, particle_tfos[i]);
         glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, position_buffers[i]);
-        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, velocity_buffers[i]);
-        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, start_time_buffers[i]);
+        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, velocity_buffers[i]);
+        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 2, start_time_buffers[i]);
     }
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 }
@@ -230,11 +229,12 @@ void scene_particles::init() {
     angle = (float)( PI / 2.0f );
 
     model = cgmath::mat4(1.0f);
-    view = cgmath::mat4::look_at(
-        cgmath::vec3(3.0f * cos(angle),1.5f,3.0f * sin(angle)),
-        cgmath::vec3(0.0f,1.5f,0.0f),
-        cgmath::vec3(0.0f,1.0f,0.0f)
-    );
+    view = cgmath::mat4(1.0f);
+    // view = cgmath::mat4::look_at(
+    //     cgmath::vec3(0.0f, 0.0f, 0.0f),
+    //     cgmath::vec3(0.0f, 0.0f, -1.0f),
+    //     cgmath::vec3(0.0f,1.0f,0.0f)
+    // );
     projection = cgmath::mat4(1.0f);
 
     this->set_mvp_uniform();
@@ -243,6 +243,10 @@ void scene_particles::init() {
 
     active_vao_idx = 1;
     last_time = 0.0f;
+
+    if ( glGetError() != GL_NO_ERROR ) {
+        std::cout << "ERROR!!!!" << std::endl;
+    }
 }
 
 
@@ -280,15 +284,18 @@ void scene_particles::mainLoop() {
     // rendering
     glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &render_subroutine_idx);
     glClear(GL_COLOR_BUFFER_BIT);
-    view = cgmath::mat4::look_at(
-        cgmath::vec3(3.0f * cos(angle),1.5f,3.0f * sin(angle)),
-        cgmath::vec3(0.0f,1.5f,0.0f),
-        cgmath::vec3(0.0f,1.0f,0.0f)
-    );
+    view = cgmath::mat4(1.0f);
+    // view = cgmath::mat4::look_at(
+    //     cgmath::vec3(3.0f * cos(angle),1.5f,3.0f * sin(angle)),
+    //     cgmath::vec3(0.0f,1.5f,0.0f),
+    //     cgmath::vec3(0.0f,1.0f,0.0f)
+    // );
     this->set_mvp_uniform();
 
     glBindVertexArray(particle_vaos[active_vao_idx]);
     glDrawArrays(GL_POINTS, 0, particle_count);
 
     active_vao_idx = 1 - active_vao_idx;
+
+
 }

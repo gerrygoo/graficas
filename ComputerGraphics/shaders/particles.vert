@@ -21,9 +21,9 @@ uniform mat4 mvp;
 subroutine uniform type_of_render_fn render_fn;
 
 subroutine (type_of_render_fn) void render() {
-    gl_Position = mvp * vec4(VertexPosition, 1.0);
+    // gl_Position = mvp * vec4(VertexPosition, 1.0);
     // gl_Position = vec4(VertexPosition, 1.0);
-    // gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+    gl_Position = vec4(0.0, 0.0, -0.5, 1.0);
 }
 
 
