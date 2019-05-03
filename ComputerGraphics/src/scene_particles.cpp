@@ -1,7 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <math.h>
-
+#include <algorithm>
 #include "ifile.h"
 
 #include "time_util.h"
@@ -9,8 +9,9 @@
 #include "scene_particles.h"
 #include "vec3.h"
 
-#define PI 3.14159265f
+#define  PI 3.14159265358979f
 #define TWOPI 6.28318530718f
+#define  DEG_RAD (PI / 180.0f)
 #define rand_max 32767.0f + 1.0f
 
 inline float mix(float x, float y, float a) {
@@ -18,14 +19,13 @@ inline float mix(float x, float y, float a) {
 }
 
 scene_particles::~scene_particles() { glDeleteProgram(program); }
-void scene_particles::awake() { glClearColor(1.0f, 1.0f, 1.0f, 1.0f); }
-void scene_particles::sleep() { glClearColor(1.0f, 1.0f, 1.0f, 1.0f); }
-
-
+void scene_particles::awake() { glClearColor(0.0f, 0.0f, 0.0f, 1.0f); }
+void scene_particles::sleep() { glClearColor(0.0f, 0.0f, 0.0f, 1.0f); }
 void scene_particles::resize(int width, int height) {
     aspect = (float)width / (float)height;
 	glViewport(0, 0, width, height);
 }
+
 
 void scene_particles::print_shader_compile_errors(GLuint shader) {
     GLint vertex_compiled;
@@ -143,24 +143,27 @@ void scene_particles::setup_buffers() {
 
         // random angles for initial velocities
         // TODO RANDOMIZE GIVEN SPAWN AREA UNIFORM ATTRS
-        // cgmath::vec3 v(0.0f);
-        // float velocity, theta, phi;
-        // for( int i = 0; i < particle_count; i++ ) {
-        //     theta = mix(0.0f, (float)PI / 6.0f, drand48());
-        //     phi = mix(0.0f, (float)TWOPI, drand48());
+        cgmath::vec3 v(0.0f);
+        float velocity, theta, phi;
+        for( int i = 0; i < particle_count; i++ ) {
+            // theta = mix(0.0f, (float)PI / 6.0f, drand48());
+            // phi = mix(0.0f, (float)TWOPI, drand48());
 
-        //     v.x = sin(theta) * cos(phi);
-        //     v.y = cos(theta);
-        //     v.z = sin(theta) * sin(phi);
+            // v.x = sin(theta) * cos(phi);
+            // v.y = cos(theta);
+            // v.z = sin(theta) * sin(phi);
 
-        //     velocity = mix(1.25f, 1.5f, drand48());
-        //     v.normalize();
-        //     v *= velocity;
+            // velocity = mix(1.25f, 1.5f, drand48());
+            // v.normalize();
+            // v *= velocity;
 
-        //     data[3*i]   = v.x;
-        //     data[3*i+1] = v.y;
-        //     data[3*i+2] = v.z;
-        // }
+            // data[3*i]   = v.x;
+            // data[3*i+1] = v.y;
+            // data[3*i+2] = v.z;
+            data[3*i]   = (i + 1) % 3 == 0 ? 0.0f : 0;
+            data[3*i+1] = (i + 1) % 3 == 1 ? 1.0f : 0;
+            data[3*i+2] = (i + 1) % 3 == 2 ? 1.0f : 0;
+        }
         glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_3f_buffer, data);
 
@@ -170,7 +173,7 @@ void scene_particles::setup_buffers() {
         delete [] data;
         data = new GLfloat[particle_count];
         float time = 0.0f;
-        float rate = 0.001f;
+        float rate = 0.0001f;
         for( int i = 0; i < particle_count; i++ ) {
             data[i] = time;
             time += rate;
@@ -182,7 +185,6 @@ void scene_particles::setup_buffers() {
         glBindBuffer(GL_ARRAY_BUFFER,0);
 
     //#pragma endregion
-
     glGenVertexArrays(2, particle_vaos);
     for (int i = 0; i < 2; i++) {
         glBindVertexArray(particle_vaos[i]);
@@ -214,54 +216,141 @@ void scene_particles::setup_buffers() {
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 }
 
+
+void scene_particles::setup_camera() {
+    camera.yaw = 0.0f;
+    camera.pitch = 0.0f;
+    camera.roll = 0.0f;
+
+    camera.position = cgmath::vec3(0.0f, 0.0f, 1.0f);
+    camera.up = cgmath::vec3(0.0f, 1.0f, 0.0f);
+    camera.target = cgmath::vec3(
+        cos(DEG_RAD * (camera.pitch)) * cos(DEG_RAD * (camera.yaw)),
+        sin(DEG_RAD * (camera.pitch)),
+        cos(DEG_RAD * (camera.pitch)) * sin(DEG_RAD * (camera.yaw))
+    );
+
+    camera.dirty = false;
+}
+
+void scene_particles::setup_matrices() {
+    model = cgmath::mat4(1.0f);
+    view = cgmath::mat4::look_at(camera.position, camera.target, camera.up);
+    projection = cgmath::mat4(1.0f);
+
+    // float
+	// 		far = 1000.0f,
+	// 		near = 0.01f,
+	// 		fov = 60 * DEG_RAD;
+
+    // projection = cgmath::mat4({
+    //     {1.0f / (aspect * tan(fov / 2.0f)), 0.0f, 0.0f, 0.0f},
+    //     {0.0f, 1.0f / tan(fov / 2.0f), 0.0f, 0.0f},
+    //     {0.0f, 0.0f, -((far + near) / (far - near)), -1.0f},
+    //     {0.0f, 0.0f, -((2.0f * far * near) / (far - near)), 0.0f},
+    // });
+}
+
+
 void scene_particles::init() {
-    particle_count = 1000;
+    particle_count = 100000 * 1; // 8;
+    active_vao_idx = 1;
 
-    glPointSize(10.0f);
-    glClearColor(0.1f,0.1f,0.1f,1.0f);
 
+    glPointSize(5.0f);
+    glClearColor(0.0f,0.0f,0.0f,1.0f);
 
     this->setup_program_with_shaders();
 	this->setup_uniforms();
     this->setup_buffers();
 
+    this->setup_camera();
 
-    angle = (float)( PI / 2.0f );
-
-    model = cgmath::mat4(1.0f);
-    view = cgmath::mat4(1.0f);
-    // view = cgmath::mat4::look_at(
-    //     cgmath::vec3(0.0f, 0.0f, 0.0f),
-    //     cgmath::vec3(0.0f, 0.0f, -1.0f),
-    //     cgmath::vec3(0.0f,1.0f,0.0f)
-    // );
-    projection = cgmath::mat4(1.0f);
-
+    this->setup_matrices();
     this->set_mvp_uniform();
-    glUniform1f(time_to_live_uniform_location, 10.0f);
-    glUniform3f(acceleration_uniform_location, 0.0f, -0.4f, 0.0f);
 
-    active_vao_idx = 1;
-    last_time = 0.0f;
+    glUniform1f(time_to_live_uniform_location, 8.0f);
+    glUniform3f(acceleration_uniform_location, 0.0f, 0.0f, 0.0f);
 
-    if ( glGetError() != GL_NO_ERROR ) {
-        std::cout << "ERROR!!!!" << std::endl;
-    }
+    if ( glGetError() != GL_NO_ERROR ) std::cout << "ERROR!!!!" << std::endl;
 }
 
+void scene_particles::keysDown(int key) {
+    float disp_speed = 0.5;
+    float rot_speed = 45.0f;
+    // std::cout << key << "   " << GLFW_KEY_UP << std::endl;
+    if ( key == GLFW_KEY_W ) {
+        camera.position.z -= disp_speed;
+        camera.dirty = true;
+    }
+    if ( key == GLFW_KEY_S ) {
+        camera.position.z += disp_speed;
+        camera.dirty = true;
+    }
+
+
+    if ( key == GLFW_KEY_UP ) {
+        camera.position.y += disp_speed;
+        camera.dirty = true;
+    }
+    if ( key == GLFW_KEY_DOWN ) {
+        camera.position.y -= disp_speed;
+        camera.dirty = true;
+    }
+
+
+    if ( key == GLFW_KEY_LEFT ) {
+        camera.position.x -= disp_speed;
+        camera.dirty = true;
+    }
+    if ( key == GLFW_KEY_RIGHT ) {
+        camera.position.x += disp_speed;
+        camera.dirty = true;
+    }
+
+
+    if ( key == GLFW_KEY_I ) {
+        camera.pitch = std::min(camera.pitch + rot_speed, 89.0f);
+        camera.dirty = true;
+    }
+    if ( key == GLFW_KEY_K ) {
+        camera.pitch = std::max(camera.pitch - rot_speed, -89.0f);
+        camera.dirty = true;
+    }
+
+    if ( key == GLFW_KEY_J ) {
+        camera.yaw += rot_speed;
+        camera.dirty = true;
+    }
+    if ( key == GLFW_KEY_L ) {
+        camera.yaw -= rot_speed;
+        camera.dirty = true;
+    }
+
+    // if ( key == GLFW_KEY_J ) camera.rotation.y += rot_speed;
+    // if ( key == GLFW_KEY_L ) camera.rotation.y -= rot_speed;
+}
 
 void scene_particles::set_mvp_uniform() {
-    const auto mvp = projection * view * model;
+    std::cout << "pitch: " << camera.pitch << ", yaw: " << camera.yaw << std::endl;
+
+    camera.target[0] = cos(DEG_RAD * (camera.pitch)) * cos(DEG_RAD * (camera.yaw));
+    camera.target[1] = sin(DEG_RAD * (camera.pitch));
+    camera.target[2] = cos(DEG_RAD * (camera.pitch)) * sin(DEG_RAD * (camera.yaw)) ;
+
+    // view = cgmath::mat4::look_at(camera.position, camera.target, camera.up);
+    view = cgmath::mat4(1.0f);
+
+
+    mvp = projection * view * model;
     glUniformMatrix4fv(mvp_uniform_location, 1, GL_FALSE, &mvp[0][0]);
+
+    camera.dirty = false;
 }
 
 void scene_particles::set_delta_time_uniform() {
-    float t = time_util::elapsed_time().count();
-    delta_time = t - last_time;
-    last_time = t;
-
-    glUniform1f(now_uniform_location, t);
-    glUniform1f(delta_time_uniform_location, delta_time);
+    glUniform1f(now_uniform_location, time_util::elapsed_time().count() );
+    glUniform1f( delta_time_uniform_location, time_util::delta_time().count() ) ;
 }
 
 void scene_particles::mainLoop() {
@@ -283,19 +372,10 @@ void scene_particles::mainLoop() {
 
     // rendering
     glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &render_subroutine_idx);
-    glClear(GL_COLOR_BUFFER_BIT);
-    view = cgmath::mat4(1.0f);
-    // view = cgmath::mat4::look_at(
-    //     cgmath::vec3(3.0f * cos(angle),1.5f,3.0f * sin(angle)),
-    //     cgmath::vec3(0.0f,1.5f,0.0f),
-    //     cgmath::vec3(0.0f,1.0f,0.0f)
-    // );
-    this->set_mvp_uniform();
-
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if ( camera.dirty )this->set_mvp_uniform();
     glBindVertexArray(particle_vaos[active_vao_idx]);
     glDrawArrays(GL_POINTS, 0, particle_count);
 
     active_vao_idx = 1 - active_vao_idx;
-
-
 }

@@ -1,5 +1,5 @@
 // #include <string>
-// #include "scene_manager.h" 
+// #include "scene_manager.h"
 // #include <glad/glad.h>
 
 // int main(int argc, char* argv[])
@@ -14,5 +14,5 @@
 #include <vector>
 
 int main(int argc, char* argv[]) {
-    scene_manager::start(argc, argv, "Hello World!", 800, 800);
+    scene_manager::start(argc, argv, "Hello World!", 1000, 1000);
 }

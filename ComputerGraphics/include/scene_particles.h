@@ -3,6 +3,13 @@
 #include "scene.h"
 #include "mat4.h"
 
+struct Camera {
+	cgmath::vec3 position, up, target;
+
+	float yaw, pitch, roll;
+	bool dirty;
+};
+
 class scene_particles : public scene {
 public:
 	~scene_particles();
@@ -11,7 +18,7 @@ public:
 	void awake();
 	void sleep();
 	void reset() { }
-    void keysDown(int key) {}
+    void keysDown(int key);
     void keysUp(int key) {}
     void passiveMotion(float x, float y) {}
 	void resize(int width, int height);
@@ -23,9 +30,13 @@ public:
 
 	void setup_uniforms();
 	void setup_buffers();
+	void setup_matrices();
+	void setup_camera();
 
 	void set_mvp_uniform();
+
 	void set_delta_time_uniform();
+	void set_view_matrix();
 
 private:
 	float aspect;
@@ -42,9 +53,8 @@ private:
 	GLuint update_subroutine_idx;
 
 	GLuint mvp_uniform_location;
-	cgmath::mat4 model, view, projection;
-	float angle;
-
+	cgmath::mat4 model, view, projection, mvp;
+	Camera camera;
 
 	GLuint particle_vaos[2];
 	GLuint particle_tfos[2];
@@ -56,5 +66,4 @@ private:
 	GLuint start_time_buffers[2];
 
 	int active_vao_idx;
-	float last_time, delta_time;
 };
