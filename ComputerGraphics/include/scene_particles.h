@@ -1,13 +1,69 @@
 # pragma once
 
+#include <math.h>
+#include <iostream>
+
 #include "scene.h"
 #include "mat4.h"
 
+
+#define  PI 3.14159265358979f
+#define  DEG_RAD (PI / 180.0f)
+
 struct Camera {
-	cgmath::vec3 position, up, target;
+	cgmath::vec3
+		position, target, right,
+		direction, up;
+
+	cgmath::mat4 rotation_m, position_m;
 
 	float yaw, pitch, roll;
 	bool dirty;
+
+	Camera():
+		yaw(),
+		pitch(),
+		roll(),
+		position(),
+		target(),
+		right(),
+		direction(),
+		up{0.0f, 1.0f, 0.0f},
+		rotation_m(1.0f),
+		position_m(1.0f)
+		{ }
+
+	cgmath::mat4 look() {
+
+		direction.x = cos(DEG_RAD * (pitch)) * cos(DEG_RAD * (yaw));
+        direction.y = sin(DEG_RAD * (pitch));
+        direction.z = cos(DEG_RAD * (pitch)) * sin(DEG_RAD * (yaw));
+		direction.normalize();
+
+		right = cgmath::vec3::cross(up, direction);
+		up = 	cgmath::vec3::cross(direction, right);
+
+		rotation_m[0].x = right.x;
+        rotation_m[1].x = right.y;
+        rotation_m[2].x = right.z;
+
+        rotation_m[0].y = up.x;
+        rotation_m[1].y = up.y;
+        rotation_m[2].y = up.z;
+
+        rotation_m[0].z = direction.x;
+        rotation_m[1].z = direction.y;
+        rotation_m[2].z = direction.z;
+
+		position_m[3].z = -position.x;
+		position_m[3].y = -position.y;
+		position_m[3].x = -position.z;
+
+		std::cout << "camera position_m: " << std::endl << position_m << std::endl;
+		std::cout << "camera rotation_m: " << std::endl << rotation_m << std::endl;
+
+		return rotation_m * position_m;
+	}
 };
 
 class scene_particles : public scene {
@@ -19,7 +75,7 @@ public:
 	void sleep();
 	void reset() { }
     void keysDown(int key);
-    void keysUp(int key) {}
+    void keysUp(int key);
     void passiveMotion(float x, float y) {}
 	void resize(int width, int height);
 

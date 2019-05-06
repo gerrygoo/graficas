@@ -14,6 +14,7 @@
 #define  DEG_RAD (PI / 180.0f)
 #define rand_max 32767.0f + 1.0f
 
+
 inline float mix(float x, float y, float a) {
     return x + a * (y - x);
 }
@@ -146,23 +147,23 @@ void scene_particles::setup_buffers() {
         cgmath::vec3 v(0.0f);
         float velocity, theta, phi;
         for( int i = 0; i < particle_count; i++ ) {
-            // theta = mix(0.0f, (float)PI / 6.0f, drand48());
-            // phi = mix(0.0f, (float)TWOPI, drand48());
+            theta = mix(0.0f, (float)PI / 6.0f, drand48());
+            phi = mix(0.0f, (float)TWOPI, drand48());
 
-            // v.x = sin(theta) * cos(phi);
-            // v.y = cos(theta);
-            // v.z = sin(theta) * sin(phi);
+            v.x = sin(theta) * cos(phi);
+            v.y = cos(theta);
+            v.z = sin(theta) * sin(phi);
 
-            // velocity = mix(1.25f, 1.5f, drand48());
-            // v.normalize();
-            // v *= velocity;
+            velocity = mix(0.5f, 1.0f, drand48());
+            v.normalize();
+            v *= velocity;
 
-            // data[3*i]   = v.x;
-            // data[3*i+1] = v.y;
-            // data[3*i+2] = v.z;
-            data[3*i]   = (i + 1) % 3 == 0 ? 0.0f : 0;
-            data[3*i+1] = (i + 1) % 3 == 1 ? 1.0f : 0;
-            data[3*i+2] = (i + 1) % 3 == 2 ? 1.0f : 0;
+            data[3*i]   = -v.x;
+            data[3*i+1] = -v.y;
+            data[3*i+2] = -v.z;
+            // data[3*i]   = (i + 1) % 3 == 0 ? 0.0f : 0;
+            // data[3*i+1] = (i + 1) % 3 == 1 ? 1.0f : 0;
+            // data[3*i+2] = (i + 1) % 3 == 2 ? 1.0f : 0;
         }
         glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_3f_buffer, data);
@@ -218,44 +219,27 @@ void scene_particles::setup_buffers() {
 
 
 void scene_particles::setup_camera() {
-    camera.yaw = 0.0f;
-    camera.pitch = 0.0f;
-    camera.roll = 0.0f;
-
-    camera.position = cgmath::vec3(0.0f, 0.0f, 1.0f);
-    camera.up = cgmath::vec3(0.0f, 1.0f, 0.0f);
-    camera.target = cgmath::vec3(
-        cos(DEG_RAD * (camera.pitch)) * cos(DEG_RAD * (camera.yaw)),
-        sin(DEG_RAD * (camera.pitch)),
-        cos(DEG_RAD * (camera.pitch)) * sin(DEG_RAD * (camera.yaw))
-    );
-
+    camera.position = cgmath::vec3(0.0f, -3.0f, 30.0f);
     camera.dirty = false;
 }
 
 void scene_particles::setup_matrices() {
     model = cgmath::mat4(1.0f);
-    view = cgmath::mat4::look_at(camera.position, camera.target, camera.up);
+    view = camera.look();
     projection = cgmath::mat4(1.0f);
 
-    // float
-	// 		far = 1000.0f,
-	// 		near = 0.01f,
-	// 		fov = 60 * DEG_RAD;
+    float
+        far = 100.0f,
+        near = 0.01f,
+        fov = 120 * DEG_RAD;
 
-    // projection = cgmath::mat4({
-    //     {1.0f / (aspect * tan(fov / 2.0f)), 0.0f, 0.0f, 0.0f},
-    //     {0.0f, 1.0f / tan(fov / 2.0f), 0.0f, 0.0f},
-    //     {0.0f, 0.0f, -((far + near) / (far - near)), -1.0f},
-    //     {0.0f, 0.0f, -((2.0f * far * near) / (far - near)), 0.0f},
-    // });
+    projection = cgmath::mat4::perspective(1.0f, fov, near, far);
+
 }
 
-
 void scene_particles::init() {
-    particle_count = 100000 * 1; // 8;
+    particle_count = 100000 * 3; // 8;
     active_vao_idx = 1;
-
 
     glPointSize(5.0f);
     glClearColor(0.0f,0.0f,0.0f,1.0f);
@@ -274,10 +258,12 @@ void scene_particles::init() {
 
     if ( glGetError() != GL_NO_ERROR ) std::cout << "ERROR!!!!" << std::endl;
 }
-
+void scene_particles::keysUp(int key) {
+    // this->keysDown(key);
+}
 void scene_particles::keysDown(int key) {
     float disp_speed = 0.5;
-    float rot_speed = 45.0f;
+    float rot_speed = 1.0f;
     // std::cout << key << "   " << GLFW_KEY_UP << std::endl;
     if ( key == GLFW_KEY_W ) {
         camera.position.z -= disp_speed;
@@ -285,6 +271,14 @@ void scene_particles::keysDown(int key) {
     }
     if ( key == GLFW_KEY_S ) {
         camera.position.z += disp_speed;
+        camera.dirty = true;
+    }
+    if ( key == GLFW_KEY_A ) {
+        camera.position.x += disp_speed;
+        camera.dirty = true;
+    }
+    if ( key == GLFW_KEY_D ) {
+        camera.position.x -= disp_speed;
         camera.dirty = true;
     }
 
@@ -309,43 +303,34 @@ void scene_particles::keysDown(int key) {
     }
 
 
-    if ( key == GLFW_KEY_I ) {
-        camera.pitch = std::min(camera.pitch + rot_speed, 89.0f);
+    if ( key == GLFW_KEY_K ) {
+        camera.pitch = std::min(camera.pitch + rot_speed, 80.0f);
         camera.dirty = true;
     }
-    if ( key == GLFW_KEY_K ) {
-        camera.pitch = std::max(camera.pitch - rot_speed, -89.0f);
+    if ( key == GLFW_KEY_I ) {
+        camera.pitch = std::max(camera.pitch - rot_speed, -80.0f);
         camera.dirty = true;
     }
 
-    if ( key == GLFW_KEY_J ) {
+    if ( key == GLFW_KEY_L ) {
         camera.yaw += rot_speed;
         camera.dirty = true;
     }
-    if ( key == GLFW_KEY_L ) {
+    if ( key == GLFW_KEY_J ) {
         camera.yaw -= rot_speed;
         camera.dirty = true;
     }
 
-    // if ( key == GLFW_KEY_J ) camera.rotation.y += rot_speed;
-    // if ( key == GLFW_KEY_L ) camera.rotation.y -= rot_speed;
 }
 
 void scene_particles::set_mvp_uniform() {
-    std::cout << "pitch: " << camera.pitch << ", yaw: " << camera.yaw << std::endl;
+    std::cout << "pitch: " << camera.pitch << ", yaw: " << camera.yaw << ", position: " << camera.position << std::endl;
 
-    camera.target[0] = cos(DEG_RAD * (camera.pitch)) * cos(DEG_RAD * (camera.yaw));
-    camera.target[1] = sin(DEG_RAD * (camera.pitch));
-    camera.target[2] = cos(DEG_RAD * (camera.pitch)) * sin(DEG_RAD * (camera.yaw)) ;
-
-    // view = cgmath::mat4::look_at(camera.position, camera.target, camera.up);
-    view = cgmath::mat4(1.0f);
-
-
+    // view = cgmath::mat4(1.0f);
+    view = camera.look();
+    camera.dirty = false;
     mvp = projection * view * model;
     glUniformMatrix4fv(mvp_uniform_location, 1, GL_FALSE, &mvp[0][0]);
-
-    camera.dirty = false;
 }
 
 void scene_particles::set_delta_time_uniform() {

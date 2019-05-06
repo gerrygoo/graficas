@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "mat4.h"
 
 namespace cgmath {
@@ -69,45 +71,15 @@ namespace cgmath {
 		return Inverse;
 	}
 
-	// mat4 mat4::look_at(const vec3& eye, const vec3& center, const vec3& up) {
-
-	// }
-
-	mat4 mat4::look_at(const vec3& eye, const vec3& center, const vec3& up) {
-		// https://stackoverflow.com/a/21830596
-		mat4 m;
-		vec3 X, Y, Z, c;
-		c = center;
-		// c.normalize();
-		Z = eye - c;
-		Z.normalize();
-		Y = up;
-		X = vec3::cross(Y, Z);
-		Y = vec3::cross(Z, X);
-		X.normalize();
-		Y.normalize();
-
-		m[0][0] = X.x;
-		m[0][1] = X.y;
-		m[0][2] = X.z;
-		m[0][3] = vec3::dot(-X, eye);
-
-		m[1][0] = Y.x;
-		m[1][1] = Y.y;
-		m[1][2] = Y.z;
-		m[1][3] = vec3::dot(-Y, eye);
-
-		m[2][0] = Z.x;
-		m[2][1] = Z.y;
-		m[2][2] = Z.z;
-		m[2][3] = vec3::dot(-Z, eye);
-
-		m[3][0] = 0;
-		m[3][1] = 0;
-		m[3][2] = 0;
-		m[3][3] = 1.0f;
-
-		return m;
+	mat4 mat4::perspective(float aspect_ratio, float fov, float near_plane, float far_plane) {
+		fov = fov * (3.14159265358979f / 180.0f);
+		mat4 to_ret;
+		to_ret[0].x = 1.0f / (aspect_ratio * tan(fov / 2.0f));
+		to_ret[1].y = 1.0f / tan(fov / 2.0f);
+		to_ret[2].z -= (far_plane + near_plane) / (far_plane - near_plane);
+		to_ret[3].z -= 2.0f * far_plane * near_plane / (far_plane - near_plane);
+		to_ret[2].w = -1;
+		return to_ret;
 	}
 
 	std::ostream& operator<<(std::ostream& o, const mat4& m) {

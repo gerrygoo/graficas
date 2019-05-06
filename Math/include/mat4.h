@@ -23,6 +23,8 @@ namespace cgmath {
 		static mat4 inverse(const mat4&);
 		static mat4 look_at(const vec3&, const vec3&, const vec3&);
 
+		static mat4 perspective(float aspect_ratio, float fov, float near, float far);
+
 		friend std::ostream& operator<<(std::ostream&, const mat4&);
 	};
 
