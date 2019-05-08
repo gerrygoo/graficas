@@ -383,9 +383,9 @@ void scene_particles::mainLoop() {
     glEnable(GL_RASTERIZER_DISCARD);
 
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, particle_tfos[active_vao_idx]);
-    glBeginTransformFeedback(GL_LINES);
+    glBeginTransformFeedback(GL_POINTS);
         glBindVertexArray(particle_vaos[1 - active_vao_idx]);
-        glDrawArrays(GL_LINES, 0, particle_count);
+        glDrawArrays(GL_POINTS, 0, particle_count);
     glEndTransformFeedback();
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
@@ -399,7 +399,7 @@ void scene_particles::mainLoop() {
     glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &render_subroutine_idx);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(particle_vaos[active_vao_idx]);
-    glDrawArrays(GL_LINES, 0, particle_count);
+    glDrawArrays(GL_POINTS, 0, particle_count);
 
     active_vao_idx = 1 - active_vao_idx;
 }
