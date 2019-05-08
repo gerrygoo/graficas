@@ -62,7 +62,6 @@ struct Camera {
 	void move(float delta_time) {
 		pitch = clamp(pitch + delta_time * 10 * turn_speed.x, -89.0, 89.0);
 		yaw += delta_time * 10 * turn_speed.y;
-		// position += delta_time * disp_speed;
 		position += delta_time * (
 			disp_speed.x * right +
 			disp_speed.y * cgmath::vec3(0.0f, 1.0f, 0.0f) +
@@ -95,9 +94,9 @@ struct Camera {
 		position_m[3].y = -position.y;
 		position_m[3].z = -position.z;
 
-		std::cout << std::endl << "direction: " << direction << std::endl;
-		std::cout << "right: " << right << std::endl << std::endl;
-		std::cout << "pitch: " << pitch << ", yaw: " << yaw << ", position: " << position << std::endl;
+		// std::cout << std::endl << "direction: " << direction << std::endl;
+		// std::cout << "right: " << right << std::endl << std::endl;
+		// std::cout << "pitch: " << pitch << ", yaw: " << yaw << ", position: " << position << std::endl;
 		// std::cout << "camera position_m: " << std::endl << position_m << std::endl;
 		// std::cout << "camera rotation_m: " << std::endl << rotation_m << std::endl;
 
@@ -110,10 +109,6 @@ struct Emisor {
 	float width, height;
 	Emisor(): position(0.0f), width(5.0f), height(5.0f) { }
 };
-
-// struct Movement {
-// 	bool u,
-// };
 
 class scene_particles : public scene {
 public:
@@ -171,6 +166,10 @@ private:
 	GLuint position_buffers[2];
 	GLuint velocity_buffers[2];
 	GLuint start_time_buffers[2];
+
+	GLuint shape_vertex_buffer;
+
+	GLuint positions_texture;
 
 	int active_vao_idx;
 

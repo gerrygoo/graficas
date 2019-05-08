@@ -7,6 +7,8 @@ layout (location = 1) in vec3 VertexVelocity;
 layout (location = 2) in float VertexStartTime;
 layout (location = 3) in vec3 VertexInitialVelocity;
 
+layout (location = 4) in vec3 ShapePosition;
+
 
 out vec3 Position;   // tf varying
 out vec3 Velocity;   // tf varying
@@ -14,12 +16,14 @@ out float StartTime; // tf varying
 
 out vec3 interpolated_color;
 
+
+uniform samplerBuffer position_texture;
+
 uniform float time_to_live;
 uniform vec3 acceleration;
 uniform vec3 emisor_position;
 uniform float emisro_width;
 uniform float emisor_height;
-
 
 uniform float now;
 uniform float delta_time;
@@ -31,12 +35,19 @@ float rand(float x) {
 }
 
 subroutine (type_of_render_fn) void render() {
+
+    // vec4 position_from_texture = texelFetch(position_texture, gl_VertexID);
+    // vec4 position_from_texture = texelFetch(position_texture, gl_InstanceID);
+
     interpolated_color = normalize(vec3(
         50 + VertexPosition.x,
         50 + VertexPosition.y,
         100 + VertexPosition.z
     ));
-    gl_Position = mvp * vec4(VertexPosition, 1.0);
+
+    gl_Position = mvp * vec4(VertexPosition, 1.0f);
+    // gl_Position = mvp * vec4(position_from_texture.xyz, 1.0);
+    // gl_Position = mvp * (vec4(ShapePosition + position_from_texture.xyz, 1.0));
 }
 
 subroutine (type_of_render_fn) void update() {
@@ -54,7 +65,6 @@ subroutine (type_of_render_fn) void update() {
             Velocity += acceleration * delta_time;
         } else {
             // past ttl, reset
-            // Position = vec3(0.0f);
             Position = vec3(
                 mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( VertexPosition.x + delta_time )),
                 mix(emisor_position.y - (emisor_height / 2.0f), emisor_position.y + (emisor_height / 2.0f), rand( VertexPosition.y + delta_time )),
@@ -63,7 +73,6 @@ subroutine (type_of_render_fn) void update() {
             Velocity = VertexInitialVelocity;
             StartTime = now;
         }
-
     }
 }
 
