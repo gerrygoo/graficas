@@ -1,6 +1,7 @@
 # pragma once
 
 #include <math.h>
+#include <algorithm>
 #include <iostream>
 
 #include "scene.h"
@@ -10,38 +11,73 @@
 #define  PI 3.14159265358979f
 #define  DEG_RAD (PI / 180.0f)
 
+inline float clamp(float n, float a, float b) {
+	return fmin(b, fmax(n, a));
+}
+
 struct Camera {
 	cgmath::vec3
-		position, target, right,
+		position, right,
 		direction, up;
 
 	cgmath::mat4 rotation_m, position_m;
 
 	float yaw, pitch, roll;
-	bool dirty;
+	cgmath::vec3 disp_speed, turn_speed;
 
 	Camera():
-		yaw(),
+		yaw(0.0f),
 		pitch(),
 		roll(),
 		position(),
-		target(),
 		right(),
 		direction(),
-		up{0.0f, 1.0f, 0.0f},
+		up(),
 		rotation_m(1.0f),
-		position_m(1.0f)
+		position_m(1.0f),
+		turn_speed(0.0f),
+		disp_speed(0.0f)
 		{ }
 
-	cgmath::mat4 look() {
+	bool must_move() {
+		return (
+			disp_speed.x ||
+			disp_speed.y ||
+			disp_speed.z ||
+			turn_speed.x ||
+			turn_speed.y ||
+			turn_speed.z
+		);
+	}
 
-		direction.x = cos(DEG_RAD * (pitch)) * cos(DEG_RAD * (yaw));
+	void zero_out_speeds() {
+		disp_speed.x = 0.0f;
+		disp_speed.y = 0.0f;
+		disp_speed.z = 0.0f;
+		turn_speed.x = 0.0f;
+		turn_speed.y = 0.0f;
+		turn_speed.z = 0.0f;
+	}
+
+	void move(float delta_time) {
+		pitch = clamp(pitch + delta_time * 10 * turn_speed.x, -89.0, 89.0);
+		yaw += delta_time * 10 * turn_speed.y;
+		// position += delta_time * disp_speed;
+		position += delta_time * (
+			disp_speed.x * right +
+			disp_speed.y * cgmath::vec3(0.0f, 1.0f, 0.0f) +
+			disp_speed.z * direction
+		);
+	}
+
+	cgmath::mat4 look() {
+		direction.z = cos(DEG_RAD * (pitch)) * cos(DEG_RAD * (yaw));
         direction.y = sin(DEG_RAD * (pitch));
-        direction.z = cos(DEG_RAD * (pitch)) * sin(DEG_RAD * (yaw));
+        direction.x = cos(DEG_RAD * (pitch)) * sin(DEG_RAD * (yaw));
 		direction.normalize();
 
-		right = cgmath::vec3::cross(up, direction);
-		up = 	cgmath::vec3::cross(direction, right);
+		right = cgmath::vec3::normalize(cgmath::vec3::cross({0.0f, 1.0f, 0.0f}, direction));
+		up =	cgmath::vec3::normalize(cgmath::vec3::cross(direction, right));
 
 		rotation_m[0].x = right.x;
         rotation_m[1].x = right.y;
@@ -55,16 +91,29 @@ struct Camera {
         rotation_m[1].z = direction.y;
         rotation_m[2].z = direction.z;
 
-		position_m[3].z = -position.x;
+		position_m[3].x = -position.x;
 		position_m[3].y = -position.y;
-		position_m[3].x = -position.z;
+		position_m[3].z = -position.z;
 
-		std::cout << "camera position_m: " << std::endl << position_m << std::endl;
-		std::cout << "camera rotation_m: " << std::endl << rotation_m << std::endl;
+		std::cout << std::endl << "direction: " << direction << std::endl;
+		std::cout << "right: " << right << std::endl << std::endl;
+		std::cout << "pitch: " << pitch << ", yaw: " << yaw << ", position: " << position << std::endl;
+		// std::cout << "camera position_m: " << std::endl << position_m << std::endl;
+		// std::cout << "camera rotation_m: " << std::endl << rotation_m << std::endl;
 
 		return rotation_m * position_m;
 	}
 };
+
+struct Emisor {
+	cgmath::vec3 position;
+	float width, height;
+	Emisor(): position(0.0f), width(5.0f), height(5.0f) { }
+};
+
+// struct Movement {
+// 	bool u,
+// };
 
 class scene_particles : public scene {
 public:
@@ -99,7 +148,6 @@ private:
 
 	GLuint program;
 
-	unsigned int particle_count;
 
 	GLuint now_uniform_location;
 	GLuint delta_time_uniform_location;
@@ -107,6 +155,9 @@ private:
 	GLuint time_to_live_uniform_location;
 	GLuint render_subroutine_idx;
 	GLuint update_subroutine_idx;
+	GLuint emisor_position_uniform_location;
+	GLuint emisro_width_uniform_location;
+	GLuint emisor_height_uniform_location;
 
 	GLuint mvp_uniform_location;
 	cgmath::mat4 model, view, projection, mvp;
@@ -122,4 +173,12 @@ private:
 	GLuint start_time_buffers[2];
 
 	int active_vao_idx;
+
+	float disp_speed, turn_speed;
+	float far, near, fov;
+
+	unsigned int particle_count;
+	Emisor emisor;
+	cgmath::vec3 acceleration;
+	float time_to_live;
 };

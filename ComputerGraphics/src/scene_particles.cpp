@@ -54,6 +54,106 @@ void scene_particles::print_program_link_errors() {
 	}
 }
 
+void scene_particles::keysUp(int key) {
+    switch(key) {
+        case GLFW_KEY_A:
+        case GLFW_KEY_D:
+            camera.disp_speed.x = 0.0f;
+            break;
+
+        case GLFW_KEY_W:
+        case GLFW_KEY_S:
+            camera.disp_speed.z = 0.0f;
+            break;
+
+        case GLFW_KEY_Q:
+        case GLFW_KEY_E:
+            camera.disp_speed.y = 0.0f;
+            break;
+
+        case GLFW_KEY_UP:
+        case GLFW_KEY_DOWN:
+            camera.turn_speed.x = 0.0f;
+            break;
+
+        case GLFW_KEY_LEFT:
+        case GLFW_KEY_RIGHT:
+            camera.turn_speed.y = 0.0f;
+            break;
+    }
+}
+
+void scene_particles::keysDown(int key) {
+    switch(key) {
+        case GLFW_KEY_1:
+            disp_speed = 1.0f;
+            turn_speed = 1.0f;
+            break;
+        case GLFW_KEY_2:
+            disp_speed = 2.0f;
+            turn_speed = 2.0f;
+            break;
+        case GLFW_KEY_3:
+            disp_speed = 3.0f;
+            turn_speed = 3.0f;
+            break;
+        case GLFW_KEY_4:
+            disp_speed = 4.0f;
+            turn_speed = 4.0f;
+            break;
+        case GLFW_KEY_5:
+            disp_speed = 5.0f;
+            turn_speed = 5.0f;
+            break;
+        case GLFW_KEY_9:
+            disp_speed = 30.0f;
+            turn_speed = 30.0f;
+            break;
+
+
+        case GLFW_KEY_A:
+            camera.disp_speed.x = -disp_speed;
+            break;
+
+        case GLFW_KEY_D:
+            camera.disp_speed.x = disp_speed;
+            break;
+
+        case GLFW_KEY_W:
+            camera.disp_speed.z = -disp_speed;
+            break;
+
+        case GLFW_KEY_S:
+            camera.disp_speed.z = disp_speed;
+            break;
+
+        case GLFW_KEY_Q:
+            camera.disp_speed.y = -disp_speed;
+            break;
+
+        case GLFW_KEY_E:
+            camera.disp_speed.y = disp_speed;
+            break;
+
+
+
+        case GLFW_KEY_UP:
+            camera.turn_speed.x = -turn_speed;
+            break;
+        case GLFW_KEY_DOWN:
+            camera.turn_speed.x = turn_speed;
+            break;
+        case GLFW_KEY_LEFT:
+            camera.turn_speed.y = turn_speed;
+            break;
+        case GLFW_KEY_RIGHT:
+            camera.turn_speed.y = -turn_speed;
+            break;
+    }
+
+}
+
+
 void scene_particles::setup_program_with_shaders() {
     program = glCreateProgram();
 
@@ -101,9 +201,18 @@ void scene_particles::setup_uniforms() {
     acceleration_uniform_location = glGetUniformLocation(program, "acceleration");
     time_to_live_uniform_location = glGetUniformLocation(program, "time_to_live");
     mvp_uniform_location = glGetUniformLocation(program, "mvp");
+    emisor_position_uniform_location = glGetUniformLocation(program, "emisor_position");
+    emisro_width_uniform_location = glGetUniformLocation(program, "emisro_width");
+    emisor_height_uniform_location = glGetUniformLocation(program, "emisor_height");
 
     render_subroutine_idx = glGetSubroutineIndex(program, GL_VERTEX_SHADER, "render");
     update_subroutine_idx = glGetSubroutineIndex(program, GL_VERTEX_SHADER, "update");
+
+    glUniform1f(emisro_width_uniform_location, emisor.width);
+    glUniform1f(emisor_height_uniform_location, emisor.height);
+    glUniform3f(emisor_position_uniform_location, emisor.position.x, emisor.position.y, emisor.position.z);
+    glUniform1f(time_to_live_uniform_location, time_to_live);
+    glUniform3f(acceleration_uniform_location, acceleration.x, acceleration.y, acceleration.z);
 }
 
 void scene_particles::setup_buffers() {
@@ -136,7 +245,14 @@ void scene_particles::setup_buffers() {
         // positions start at 0,0,0
         // TODO RANDOMIZE GIVEN SPAWN AREA UNIFORM ATTRS
         GLfloat *data = new GLfloat[particle_count * 3];
-        for( int i = 0; i < particle_count * 3; i++ ) data[i] = 0.0f;
+        for( int i = 0; i < particle_count; i++ ) {
+            data[3*i] = mix(emisor.position.x - (emisor.width/2.0f), emisor.position.x + (emisor.width/2.0f), drand48());
+            data[3*i+1] = mix(emisor.position.y - (emisor.height/2.0f), emisor.position.y + (emisor.height/2.0f), drand48());
+            data[3*i+2] = mix(emisor.position.x - (emisor.width/2.0f), emisor.position.x + (emisor.width/2.0f), drand48());
+            // data[3*i] = 0.0f;
+            // data[3*i+1] = 0.0f;
+            // data[3*i+2] = 0.0f;
+        }
 
         glBindBuffer(GL_ARRAY_BUFFER, position_buffers[0]);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_3f_buffer, data);
@@ -147,23 +263,23 @@ void scene_particles::setup_buffers() {
         cgmath::vec3 v(0.0f);
         float velocity, theta, phi;
         for( int i = 0; i < particle_count; i++ ) {
-            theta = mix(0.0f, (float)PI / 6.0f, drand48());
-            phi = mix(0.0f, (float)TWOPI, drand48());
+            // theta = mix(0.0f, (float)PI / 6.0f, drand48());
+            // phi = mix(0.0f, (float)TWOPI, drand48());
 
-            v.x = sin(theta) * cos(phi);
-            v.y = cos(theta);
-            v.z = sin(theta) * sin(phi);
+            // v.x = sin(theta) * cos(phi);
+            // v.y = cos(theta);
+            // v.z = sin(theta) * sin(phi);
 
-            velocity = mix(0.5f, 1.0f, drand48());
-            v.normalize();
-            v *= velocity;
+            // velocity = mix(0.5f, 1.0f, drand48());
+            // v.normalize();
+            // v *= velocity;
 
-            data[3*i]   = -v.x;
-            data[3*i+1] = -v.y;
-            data[3*i+2] = -v.z;
-            // data[3*i]   = (i + 1) % 3 == 0 ? 0.0f : 0;
-            // data[3*i+1] = (i + 1) % 3 == 1 ? 1.0f : 0;
-            // data[3*i+2] = (i + 1) % 3 == 2 ? 1.0f : 0;
+            // data[3*i]   = -v.x;
+            // data[3*i+1] = -v.y;
+            // data[3*i+2] = -v.z;
+            data[3*i]   = (i + 1) % 3 == 0 ? 0.0f : 0;
+            data[3*i+1] = (i + 1) % 3 == 1 ? 0.0f : 0;
+            data[3*i+2] = (i + 1) % 3 == 2 ? 0.0f : 0;
         }
         glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_3f_buffer, data);
@@ -219,8 +335,7 @@ void scene_particles::setup_buffers() {
 
 
 void scene_particles::setup_camera() {
-    camera.position = cgmath::vec3(0.0f, -3.0f, 30.0f);
-    camera.dirty = false;
+    camera.position = cgmath::vec3(0.0f, 0.0f, 0.0f);
 }
 
 void scene_particles::setup_matrices() {
@@ -228,10 +343,10 @@ void scene_particles::setup_matrices() {
     view = camera.look();
     projection = cgmath::mat4(1.0f);
 
-    float
-        far = 100.0f,
-        near = 0.01f,
-        fov = 120 * DEG_RAD;
+
+    far = 2000.0f,
+    near = 0.01f,
+    fov = 90;
 
     projection = cgmath::mat4::perspective(1.0f, fov, near, far);
 
@@ -239,7 +354,18 @@ void scene_particles::setup_matrices() {
 
 void scene_particles::init() {
     particle_count = 100000 * 3; // 8;
-    active_vao_idx = 1;
+    time_to_live = 20.0f;
+    acceleration.y = -0.98f;
+    emisor.position.y = 50.0;
+
+    emisor.height = 1.0f;
+    emisor.width = 50.0f;
+
+    // emisor.position.x = emisor.width;
+    // emisor.position.z = emisor.width;
+
+    disp_speed = 1.0;
+    turn_speed = 1.0f;
 
     glPointSize(5.0f);
     glClearColor(0.0f,0.0f,0.0f,1.0f);
@@ -253,82 +379,12 @@ void scene_particles::init() {
     this->setup_matrices();
     this->set_mvp_uniform();
 
-    glUniform1f(time_to_live_uniform_location, 8.0f);
-    glUniform3f(acceleration_uniform_location, 0.0f, 0.0f, 0.0f);
-
+    active_vao_idx = 1;
     if ( glGetError() != GL_NO_ERROR ) std::cout << "ERROR!!!!" << std::endl;
-}
-void scene_particles::keysUp(int key) {
-    // this->keysDown(key);
-}
-void scene_particles::keysDown(int key) {
-    float disp_speed = 0.5;
-    float rot_speed = 1.0f;
-    // std::cout << key << "   " << GLFW_KEY_UP << std::endl;
-    if ( key == GLFW_KEY_W ) {
-        camera.position.z -= disp_speed;
-        camera.dirty = true;
-    }
-    if ( key == GLFW_KEY_S ) {
-        camera.position.z += disp_speed;
-        camera.dirty = true;
-    }
-    if ( key == GLFW_KEY_A ) {
-        camera.position.x += disp_speed;
-        camera.dirty = true;
-    }
-    if ( key == GLFW_KEY_D ) {
-        camera.position.x -= disp_speed;
-        camera.dirty = true;
-    }
-
-
-    if ( key == GLFW_KEY_UP ) {
-        camera.position.y += disp_speed;
-        camera.dirty = true;
-    }
-    if ( key == GLFW_KEY_DOWN ) {
-        camera.position.y -= disp_speed;
-        camera.dirty = true;
-    }
-
-
-    if ( key == GLFW_KEY_LEFT ) {
-        camera.position.x -= disp_speed;
-        camera.dirty = true;
-    }
-    if ( key == GLFW_KEY_RIGHT ) {
-        camera.position.x += disp_speed;
-        camera.dirty = true;
-    }
-
-
-    if ( key == GLFW_KEY_K ) {
-        camera.pitch = std::min(camera.pitch + rot_speed, 80.0f);
-        camera.dirty = true;
-    }
-    if ( key == GLFW_KEY_I ) {
-        camera.pitch = std::max(camera.pitch - rot_speed, -80.0f);
-        camera.dirty = true;
-    }
-
-    if ( key == GLFW_KEY_L ) {
-        camera.yaw += rot_speed;
-        camera.dirty = true;
-    }
-    if ( key == GLFW_KEY_J ) {
-        camera.yaw -= rot_speed;
-        camera.dirty = true;
-    }
-
 }
 
 void scene_particles::set_mvp_uniform() {
-    std::cout << "pitch: " << camera.pitch << ", yaw: " << camera.yaw << ", position: " << camera.position << std::endl;
-
-    // view = cgmath::mat4(1.0f);
     view = camera.look();
-    camera.dirty = false;
     mvp = projection * view * model;
     glUniformMatrix4fv(mvp_uniform_location, 1, GL_FALSE, &mvp[0][0]);
 }
@@ -356,9 +412,12 @@ void scene_particles::mainLoop() {
     glDisable(GL_RASTERIZER_DISCARD);
 
     // rendering
+    if ( camera.must_move() ) {
+        camera.move(time_util::delta_time().count());
+        this->set_mvp_uniform();
+    }
     glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &render_subroutine_idx);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if ( camera.dirty )this->set_mvp_uniform();
     glBindVertexArray(particle_vaos[active_vao_idx]);
     glDrawArrays(GL_POINTS, 0, particle_count);
 
