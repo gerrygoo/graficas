@@ -144,6 +144,8 @@ public:
 	void set_view_matrix();
 
 private:
+	bool debug;
+
 	float aspect;
 
 	GLuint program;

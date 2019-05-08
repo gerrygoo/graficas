@@ -242,12 +242,15 @@ void scene_particles::setup_buffers() {
 
         GLfloat *data = new GLfloat[particle_count * 3];
         for( int i = 0; i < particle_count; i++ ) {
-            data[3*i] = mix(emisor.position.x - (emisor.width/2.0f), emisor.position.x + (emisor.width/2.0f), drand48());
-            data[3*i+1] = mix(emisor.position.y - (emisor.height/2.0f), emisor.position.y + (emisor.height/2.0f), drand48());
-            data[3*i+2] = mix(emisor.position.x - (emisor.width/2.0f), emisor.position.x + (emisor.width/2.0f), drand48());
-            // data[3*i] = 0.0f;
-            // data[3*i+1] = 0.0f;
-            // data[3*i+2] = 0.0f;
+            if (debug) {
+                data[3*i] = 0.0f;
+                data[3*i+1] = 0.0f;
+                data[3*i+2] = 0.0f;
+            } else {
+                data[3*i] = mix(emisor.position.x - (emisor.width/2.0f), emisor.position.x + (emisor.width/2.0f), drand48());
+                data[3*i+1] = mix(emisor.position.y - (emisor.height/2.0f), emisor.position.y + (emisor.height/2.0f), drand48());
+                data[3*i+2] = mix(emisor.position.x - (emisor.width/2.0f), emisor.position.x + (emisor.width/2.0f), drand48());
+            }
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, position_buffers[0]);
@@ -273,9 +276,15 @@ void scene_particles::setup_buffers() {
             // data[3*i]   = -v.x;
             // data[3*i+1] = -v.y;
             // data[3*i+2] = -v.z;
-            data[3*i]   = (i + 1) % 3 == 0 ? 0.0f : 0;
-            data[3*i+1] = (i + 1) % 3 == 1 ? 0.0f : 0;
-            data[3*i+2] = (i + 1) % 3 == 2 ? 0.0f : 0;
+            if (debug) {
+                data[3*i]   = (i + 1) % 3 == 0 ? 0.5f : 0;
+                data[3*i+1] = (i + 1) % 3 == 1 ? 1.5f : 0;
+                data[3*i+2] = (i + 1) % 3 == 2 ? 1.5f : 0;
+            } else {
+                data[3*i]   = 0;
+                data[3*i+1] = 0;
+                data[3*i+2] = 0;
+            }
         }
         glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_3f_buffer, data);
@@ -298,6 +307,8 @@ void scene_particles::setup_buffers() {
         glBindBuffer(GL_ARRAY_BUFFER,0);
 
     //#pragma endregion
+
+
     glGenVertexArrays(2, particle_vaos);
     for (int i = 0; i < 2; i++) {
         glBindVertexArray(particle_vaos[i]);
@@ -338,7 +349,7 @@ void scene_particles::setup_buffers() {
 
 
 void scene_particles::setup_camera() {
-    camera.position = cgmath::vec3(0.0f, 45.0f, 0.0f);
+    camera.position = debug ? cgmath::vec3(0.0f, 1.0f, 3.0f) : cgmath::vec3(0.0f, 45.0f, 0.0f);
 }
 
 void scene_particles::setup_matrices() {
@@ -356,17 +367,18 @@ void scene_particles::setup_matrices() {
 }
 
 void scene_particles::init() {
+    debug = true;
     particle_count = 100000 * 3; // 8;
-    time_to_live = 20.0f;
-    acceleration.y = -0.98f;
+    time_to_live = debug ? 60.0f : 20.0f;
+    acceleration.y = debug ? 0 : -0.98f;
     emisor.position.y = 50.0;
     emisor.height = 1.0f;
     emisor.width = 50.0f;
 
-    disp_speed = 30.0f;
-    turn_speed = 30.0f;
+    disp_speed = debug ? 10.0f : 50.0f;
+    turn_speed = debug ? 10.0f : 30.0f;
 
-    glPointSize(5.0f);
+    glPointSize(debug ? 20.0f : 5.0f);
     glClearColor(0.0f,0.0f,0.0f,1.0f);
 
     this->setup_program_with_shaders();
@@ -419,9 +431,13 @@ void scene_particles::mainLoop() {
     }
     glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &render_subroutine_idx);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glBindVertexArray(particle_vaos[active_vao_idx]);
+
     glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, position_buffers[active_vao_idx]);
-    glDrawArrays(GL_POINTS, 0, particle_count);
+
+    glDrawArraysInstanced(GL_POINTS, 0, 6, 1);
+    // glDrawArrays(GL_POINTS, 0, 1);
 
     active_vao_idx = 1 - active_vao_idx;
 }
