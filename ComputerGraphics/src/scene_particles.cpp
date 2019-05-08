@@ -204,13 +204,16 @@ void scene_particles::setup_buffers() {
     glGenBuffers(2, velocity_buffers);
     glGenBuffers(2, start_time_buffers);
     glGenBuffers(1, &initial_velocity_buffer);
+    glGenBuffers(1, &shape_vertex_buffer);
 
     const unsigned int sizeof_3f_buffer = sizeof(float) * 3 * particle_count;
     const unsigned int sizeof_1f_buffer = sizeof(float) * particle_count;
+    const unsigned int sizeof_shape_vertex_buffer = 6 * 3 * sizeof(float);
 
     // alloc
     glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof_3f_buffer, NULL, GL_DYNAMIC_COPY);
+
     for (int i = 0; i < 2; i++) {
         glBindBuffer(GL_ARRAY_BUFFER, position_buffers[i]);
         glBufferData(GL_ARRAY_BUFFER, sizeof_3f_buffer, NULL, GL_DYNAMIC_COPY);
@@ -223,11 +226,17 @@ void scene_particles::setup_buffers() {
     }
 
     //#pragma region initial values
+        GLfloat shape_points[6][3] = {
+            {-1.0f, 1.0f, 0.0f},
+            {-1.0f, -1.0f, 0.0f},
+            {1.0f, 1.0f, 0.0f},
+            {1.0f, 1.0f, 0.0f},
+            {-1.0f, -1.0f, 0.0f},
+            {1.0f, -1.0f, 0.0f},
+        };
+        glBindBuffer(GL_ARRAY_BUFFER, shape_vertex_buffer);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_shape_vertex_buffer, shape_points);
 
-        // initial fill, TODO simplify
-
-        // positions start at 0,0,0
-        // TODO RANDOMIZE GIVEN SPAWN AREA UNIFORM ATTRS
         GLfloat *data = new GLfloat[particle_count * 3];
         for( int i = 0; i < particle_count; i++ ) {
             data[3*i] = mix(emisor.position.x - (emisor.width/2.0f), emisor.position.x + (emisor.width/2.0f), drand48());
@@ -304,8 +313,15 @@ void scene_particles::setup_buffers() {
         glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
         glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, NULL);
         glEnableVertexAttribArray(3);
+
+        glBindBuffer(GL_ARRAY_BUFFER, shape_vertex_buffer);
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+        glEnableVertexAttribArray(4);
     }
     glBindVertexArray(0);
+
+    glGenTextures(1, &positions_texture);
+    glBindTexture(GL_TEXTURE_BUFFER, positions_texture);
 
     glGenTransformFeedbacks(2, particle_tfos);
     for (int i = 0; i < 2; i++) {
@@ -319,7 +335,7 @@ void scene_particles::setup_buffers() {
 
 
 void scene_particles::setup_camera() {
-    camera.position = cgmath::vec3(0.0f, 0.0f, 0.0f);
+    camera.position = cgmath::vec3(0.0f, 45.0f, 0.0f);
 }
 
 void scene_particles::setup_matrices() {
@@ -399,6 +415,7 @@ void scene_particles::mainLoop() {
     glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &render_subroutine_idx);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(particle_vaos[active_vao_idx]);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, position_buffers[active_vao_idx]);
     glDrawArrays(GL_POINTS, 0, particle_count);
 
     active_vao_idx = 1 - active_vao_idx;

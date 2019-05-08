@@ -172,6 +172,11 @@ private:
 	GLuint velocity_buffers[2];
 	GLuint start_time_buffers[2];
 
+
+	GLuint shape_vertex_buffer;
+
+	GLuint positions_texture;
+
 	int active_vao_idx;
 
 	float disp_speed, turn_speed;

@@ -7,6 +7,8 @@ layout (location = 1) in vec3 VertexVelocity;
 layout (location = 2) in float VertexStartTime;
 layout (location = 3) in vec3 VertexInitialVelocity;
 
+layout (location = 4) in vec3 shape_positions;
+
 
 out vec3 Position;   // tf varying
 out vec3 Velocity;   // tf varying
@@ -20,6 +22,7 @@ uniform vec3 emisor_position;
 uniform float emisro_width;
 uniform float emisor_height;
 
+uniform samplerBuffer positions_texture;
 
 uniform float now;
 uniform float delta_time;
@@ -36,7 +39,12 @@ subroutine (type_of_render_fn) void render() {
         50 + VertexPosition.y,
         100 + VertexPosition.z
     ));
-    gl_Position = mvp * vec4(VertexPosition, 1.0);
+
+
+    // gl_Position = mvp * vec4(VertexPosition, 1.0);
+
+    vec4 vertex_position_from_texture = texelFetch(positions_texture, gl_VertexID);
+    gl_Position = mvp * vec4(vertex_position_from_texture.xyz, 1.0);
 }
 
 subroutine (type_of_render_fn) void update() {
