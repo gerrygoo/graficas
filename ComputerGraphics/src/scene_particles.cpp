@@ -214,6 +214,9 @@ void scene_particles::setup_buffers() {
     glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof_3f_buffer, NULL, GL_DYNAMIC_COPY);
 
+    glBindBuffer(GL_ARRAY_BUFFER, shape_vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof_shape_vertex_buffer, NULL, GL_DYNAMIC_DRAW);
+
     for (int i = 0; i < 2; i++) {
         glBindBuffer(GL_ARRAY_BUFFER, position_buffers[i]);
         glBufferData(GL_ARRAY_BUFFER, sizeof_3f_buffer, NULL, GL_DYNAMIC_COPY);
@@ -376,7 +379,9 @@ void scene_particles::init() {
     this->set_mvp_uniform();
 
     active_vao_idx = 1;
-    if ( glGetError() != GL_NO_ERROR ) std::cout << "ERROR!!!!" << std::endl;
+
+    GLenum error = glGetError();
+    if ( error != GL_NO_ERROR ) std::cout << "ERROR!!!!  " << error << std::endl;
 }
 
 void scene_particles::set_mvp_uniform() {

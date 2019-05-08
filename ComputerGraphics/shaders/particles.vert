@@ -43,6 +43,7 @@ subroutine (type_of_render_fn) void render() {
 
     // gl_Position = mvp * vec4(VertexPosition, 1.0);
 
+    // vec4 vertex_position_from_texture = texelFetch(positions_texture, gl_InstanceID);
     vec4 vertex_position_from_texture = texelFetch(positions_texture, gl_VertexID);
     gl_Position = mvp * vec4(vertex_position_from_texture.xyz, 1.0);
 }
