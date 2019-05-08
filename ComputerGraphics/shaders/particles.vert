@@ -34,7 +34,7 @@ subroutine (type_of_render_fn) void render() {
     interpolated_color = normalize(vec3(
         50 + VertexPosition.x,
         50 + VertexPosition.y,
-        10 + VertexPosition.z
+        100 + VertexPosition.z
     ));
     gl_Position = mvp * vec4(VertexPosition, 1.0);
 }

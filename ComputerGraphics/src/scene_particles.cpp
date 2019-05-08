@@ -89,22 +89,6 @@ void scene_particles::keysDown(int key) {
             disp_speed = 1.0f;
             turn_speed = 1.0f;
             break;
-        case GLFW_KEY_2:
-            disp_speed = 2.0f;
-            turn_speed = 2.0f;
-            break;
-        case GLFW_KEY_3:
-            disp_speed = 3.0f;
-            turn_speed = 3.0f;
-            break;
-        case GLFW_KEY_4:
-            disp_speed = 4.0f;
-            turn_speed = 4.0f;
-            break;
-        case GLFW_KEY_5:
-            disp_speed = 5.0f;
-            turn_speed = 5.0f;
-            break;
         case GLFW_KEY_9:
             disp_speed = 30.0f;
             turn_speed = 30.0f;
@@ -357,15 +341,11 @@ void scene_particles::init() {
     time_to_live = 20.0f;
     acceleration.y = -0.98f;
     emisor.position.y = 50.0;
-
     emisor.height = 1.0f;
     emisor.width = 50.0f;
 
-    // emisor.position.x = emisor.width;
-    // emisor.position.z = emisor.width;
-
-    disp_speed = 1.0;
-    turn_speed = 1.0f;
+    disp_speed = 30.0f;
+    turn_speed = 30.0f;
 
     glPointSize(5.0f);
     glClearColor(0.0f,0.0f,0.0f,1.0f);
@@ -403,9 +383,9 @@ void scene_particles::mainLoop() {
     glEnable(GL_RASTERIZER_DISCARD);
 
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, particle_tfos[active_vao_idx]);
-    glBeginTransformFeedback(GL_POINTS);
+    glBeginTransformFeedback(GL_LINES);
         glBindVertexArray(particle_vaos[1 - active_vao_idx]);
-        glDrawArrays(GL_POINTS, 0, particle_count);
+        glDrawArrays(GL_LINES, 0, particle_count);
     glEndTransformFeedback();
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
@@ -419,7 +399,7 @@ void scene_particles::mainLoop() {
     glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &render_subroutine_idx);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(particle_vaos[active_vao_idx]);
-    glDrawArrays(GL_POINTS, 0, particle_count);
+    glDrawArrays(GL_LINES, 0, particle_count);
 
     active_vao_idx = 1 - active_vao_idx;
 }
