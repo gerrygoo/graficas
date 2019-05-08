@@ -40,13 +40,10 @@ subroutine (type_of_render_fn) void render() {
         100 + VertexPosition.z
     ));
 
-
-    // gl_Position = mvp * vec4(VertexPosition, 1.0);
-
     // vec4 vertex_position_from_texture = texelFetch(positions_texture, gl_VertexID);
     vec4 vertex_position_from_texture = texelFetch(positions_texture, gl_InstanceID);
     vec3 lol_position = ShapePosition;
-    gl_Position = mvp * vec4(vertex_position_from_texture.xyz, 1.0);
+    gl_Position = mvp * vec4(lol_position + vertex_position_from_texture.xyz, 1.0);
 }
 
 subroutine (type_of_render_fn) void update() {
@@ -65,11 +62,11 @@ subroutine (type_of_render_fn) void update() {
         } else {
             // past ttl, reset
             Position = vec3(0.0f);
-            // Position = vec3(
-            //     mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( VertexPosition.x + delta_time )),
-            //     mix(emisor_position.y - (emisor_height / 2.0f), emisor_position.y + (emisor_height / 2.0f), rand( VertexPosition.y + delta_time )),
-            //     mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( VertexPosition.z + delta_time ))
-            // );
+            Position = vec3(
+                mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( VertexPosition.x + delta_time )),
+                mix(emisor_position.y - (emisor_height / 2.0f), emisor_position.y + (emisor_height / 2.0f), rand( VertexPosition.y + delta_time )),
+                mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( VertexPosition.z + delta_time ))
+            );
             Velocity = VertexInitialVelocity;
             StartTime = now;
         }

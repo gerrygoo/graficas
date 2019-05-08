@@ -1,12 +1,14 @@
+#include "scene_particles.h"
+
+#include <math.h>
+
 #include <vector>
 #include <iostream>
-#include <math.h>
 #include <algorithm>
-#include "ifile.h"
+
 
 #include "time_util.h"
-
-#include "scene_particles.h"
+#include "ifile.h"
 #include "vec3.h"
 
 #define  PI 3.14159265358979f
@@ -208,7 +210,7 @@ void scene_particles::setup_buffers() {
 
     const unsigned int sizeof_3f_buffer = sizeof(float) * 3 * particle_count;
     const unsigned int sizeof_1f_buffer = sizeof(float) * particle_count;
-    const unsigned int sizeof_shape_vertex_buffer = 6 * 3 * sizeof(float);
+    const unsigned int sizeof_shape_vertex_buffer = sizeof_3f_buffer;// 6 * 3 * sizeof(float);
 
     // alloc
     glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
@@ -237,10 +239,17 @@ void scene_particles::setup_buffers() {
             {-1.0f, -1.0f, 0.0f},
             {1.0f, -1.0f, 0.0f},
         };
-        glBindBuffer(GL_ARRAY_BUFFER, shape_vertex_buffer);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_shape_vertex_buffer, shape_points);
 
         GLfloat *data = new GLfloat[particle_count * 3];
+        for( int i = 0; i < particle_count; i++ ) {
+                data[3*i]   = (i + 1) % 3 == 0 ? 1.0f : 0;
+                data[3*i+1] = (i + 1) % 3 == 1 ? 1.0f : 0;
+                data[3*i+2] = (i + 1) % 3 == 2 ? 1.0f : 0;
+        }
+        glBindBuffer(GL_ARRAY_BUFFER, shape_vertex_buffer);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_shape_vertex_buffer, data);
+
+        // GLfloat *data = new GLfloat[particle_count * 3];
         for( int i = 0; i < particle_count; i++ ) {
             if (debug) {
                 data[3*i] = 0.0f;
@@ -257,29 +266,13 @@ void scene_particles::setup_buffers() {
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_3f_buffer, data);
 
 
-        // random angles for initial velocities
-        // TODO RANDOMIZE GIVEN SPAWN AREA UNIFORM ATTRS
         cgmath::vec3 v(0.0f);
-        float velocity, theta, phi;
+        float velocity = 0.0f;
         for( int i = 0; i < particle_count; i++ ) {
-            // theta = mix(0.0f, (float)PI / 6.0f, drand48());
-            // phi = mix(0.0f, (float)TWOPI, drand48());
-
-            // v.x = sin(theta) * cos(phi);
-            // v.y = cos(theta);
-            // v.z = sin(theta) * sin(phi);
-
-            // velocity = mix(0.5f, 1.0f, drand48());
-            // v.normalize();
-            // v *= velocity;
-
-            // data[3*i]   = -v.x;
-            // data[3*i+1] = -v.y;
-            // data[3*i+2] = -v.z;
             if (debug) {
-                data[3*i]   = (i + 1) % 3 == 0 ? 0.5f : 0;
-                data[3*i+1] = (i + 1) % 3 == 1 ? 1.5f : 0;
-                data[3*i+2] = (i + 1) % 3 == 2 ? 1.5f : 0;
+                data[3*i]   = (i + 1) % 3 == 0 ? velocity : 0;
+                data[3*i+1] = (i + 1) % 3 == 1 ? 0.5f : 0;
+                data[3*i+2] = (i + 1) % 3 == 2 ? velocity : 0;
             } else {
                 data[3*i]   = 0;
                 data[3*i+1] = 0;
@@ -353,7 +346,7 @@ void scene_particles::setup_camera() {
 }
 
 void scene_particles::setup_matrices() {
-    model = cgmath::mat4(1.0f);
+    model = cgmath::mat4(0.1f);
     view = camera.look();
     projection = cgmath::mat4(1.0f);
 
@@ -367,8 +360,8 @@ void scene_particles::setup_matrices() {
 }
 
 void scene_particles::init() {
-    debug = true;
-    particle_count = 100000 * 3; // 8;
+    debug = false;
+    particle_count = 5000; // 100000 * 3; // 8;
     time_to_live = debug ? 60.0f : 20.0f;
     acceleration.y = debug ? 0 : -0.98f;
     emisor.position.y = 50.0;
@@ -436,8 +429,8 @@ void scene_particles::mainLoop() {
 
     glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, position_buffers[active_vao_idx]);
 
-    glDrawArraysInstanced(GL_POINTS, 0, 6, 1);
-    // glDrawArrays(GL_POINTS, 0, 1);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, particle_count);
+    // glDrawArraysInstanced(GL_POINTS, 0, particle_count, 1);
 
     active_vao_idx = 1 - active_vao_idx;
 }
