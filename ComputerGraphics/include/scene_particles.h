@@ -97,7 +97,7 @@ struct Camera {
 
 		std::cout << std::endl << "direction: " << direction << std::endl;
 		std::cout << "right: " << right << std::endl << std::endl;
-		std::cout << "pitch: " << pitch << ", yaw: " << yaw << ", position: " << position << std::endl;
+		// std::cout << "pitch: " << pitch << ", yaw: " << yaw << ", position: " << position << std::endl;
 		// std::cout << "camera position_m: " << std::endl << position_m << std::endl;
 		// std::cout << "camera rotation_m: " << std::endl << rotation_m << std::endl;
 
@@ -160,6 +160,9 @@ private:
 	GLuint emisor_position_uniform_location;
 	GLuint emisro_width_uniform_location;
 	GLuint emisor_height_uniform_location;
+
+	GLuint camera_up_uniform_location;
+	GLuint camera_right_uniform_location;
 
 	GLuint mvp_uniform_location;
 	cgmath::mat4 model, view, projection, mvp;

@@ -54,8 +54,8 @@ void scene_manager::start(int argc,
 
     // OpenGL init
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_BACK);
     // GL version
     std::cout << glGetString(GL_VERSION) << std::endl;
 

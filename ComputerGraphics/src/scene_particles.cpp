@@ -190,6 +190,8 @@ void scene_particles::setup_uniforms() {
     emisor_position_uniform_location = glGetUniformLocation(program, "emisor_position");
     emisro_width_uniform_location = glGetUniformLocation(program, "emisro_width");
     emisor_height_uniform_location = glGetUniformLocation(program, "emisor_height");
+    camera_up_uniform_location = glGetUniformLocation(program, "camera_up");
+	camera_right_uniform_location = glGetUniformLocation(program, "camera_right");
 
     render_subroutine_idx = glGetSubroutineIndex(program, GL_VERTEX_SHADER, "render");
     update_subroutine_idx = glGetSubroutineIndex(program, GL_VERTEX_SHADER, "update");
@@ -210,7 +212,7 @@ void scene_particles::setup_buffers() {
 
     const unsigned int sizeof_3f_buffer = sizeof(float) * 3 * particle_count;
     const unsigned int sizeof_1f_buffer = sizeof(float) * particle_count;
-    const unsigned int sizeof_shape_vertex_buffer = sizeof_3f_buffer;// 6 * 3 * sizeof(float);
+    const unsigned int sizeof_shape_vertex_buffer = 6 * 3 * sizeof(float);
 
     // alloc
     glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
@@ -232,12 +234,12 @@ void scene_particles::setup_buffers() {
 
     //#pragma region initial values
         GLfloat shape_points[6][3] = {
-            {-1.0f, 1.0f, 0.0f},
-            {-1.0f, -1.0f, 0.0f},
-            {1.0f, 1.0f, 0.0f},
-            {1.0f, 1.0f, 0.0f},
-            {-1.0f, -1.0f, 0.0f},
-            {1.0f, -1.0f, 0.0f},
+            {-0.3f, 1.0f, 0.0f},
+            {-0.3f, -1.0f, 0.0f},
+            {0.3f, 1.0f, 0.0f},
+            {0.3f, 1.0f, 0.0f},
+            {-0.3f, -1.0f, 0.0f},
+            {0.3f, -1.0f, 0.0f},
         };
 
         GLfloat *data = new GLfloat[particle_count * 3];
@@ -247,7 +249,7 @@ void scene_particles::setup_buffers() {
                 data[3*i+2] = (i + 1) % 3 == 2 ? 1.0f : 0;
         }
         glBindBuffer(GL_ARRAY_BUFFER, shape_vertex_buffer);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_shape_vertex_buffer, data);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_shape_vertex_buffer, shape_points);
 
         // GLfloat *data = new GLfloat[particle_count * 3];
         for( int i = 0; i < particle_count; i++ ) {
@@ -307,18 +309,22 @@ void scene_particles::setup_buffers() {
         glBindVertexArray(particle_vaos[i]);
         glBindBuffer(GL_ARRAY_BUFFER, position_buffers[i]);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+        glVertexAttribDivisor(0, 1);
         glEnableVertexAttribArray(0);
 
         glBindBuffer(GL_ARRAY_BUFFER, velocity_buffers[i]);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+        glVertexAttribDivisor(1, 1);
         glEnableVertexAttribArray(1);
 
         glBindBuffer(GL_ARRAY_BUFFER, start_time_buffers[i]);
         glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+        glVertexAttribDivisor(2, 1);
         glEnableVertexAttribArray(2);
 
         glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
         glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+        glVertexAttribDivisor(3, 1);
         glEnableVertexAttribArray(3);
 
         glBindBuffer(GL_ARRAY_BUFFER, shape_vertex_buffer);
@@ -326,9 +332,6 @@ void scene_particles::setup_buffers() {
         glEnableVertexAttribArray(4);
     }
     glBindVertexArray(0);
-
-    glGenTextures(1, &positions_texture);
-    glBindTexture(GL_TEXTURE_BUFFER, positions_texture);
 
     glGenTransformFeedbacks(2, particle_tfos);
     for (int i = 0; i < 2; i++) {
@@ -361,12 +364,12 @@ void scene_particles::setup_matrices() {
 
 void scene_particles::init() {
     debug = false;
-    particle_count = 5000; // 100000 * 3; // 8;
+    particle_count = 100000 * 3; // 8;
     time_to_live = debug ? 60.0f : 20.0f;
     acceleration.y = debug ? 0 : -0.98f;
     emisor.position.y = 50.0;
     emisor.height = 1.0f;
-    emisor.width = 50.0f;
+    emisor.width = 500.0f;
 
     disp_speed = debug ? 10.0f : 50.0f;
     turn_speed = debug ? 10.0f : 30.0f;
@@ -393,6 +396,8 @@ void scene_particles::set_mvp_uniform() {
     view = camera.look();
     mvp = projection * view * model;
     glUniformMatrix4fv(mvp_uniform_location, 1, GL_FALSE, &mvp[0][0]);
+    // glUniform3fv(camera_up_uniform_location, 1, &camera.up[0]);
+    glUniform3fv(camera_right_uniform_location, 1, &camera.direction[0]);
 }
 
 void scene_particles::set_delta_time_uniform() {
@@ -411,7 +416,8 @@ void scene_particles::mainLoop() {
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, particle_tfos[active_vao_idx]);
     glBeginTransformFeedback(GL_POINTS);
         glBindVertexArray(particle_vaos[1 - active_vao_idx]);
-        glDrawArrays(GL_POINTS, 0, particle_count);
+        // glDrawArrays(GL_POINTS, 0, particle_count);
+        glDrawArraysInstanced(GL_POINTS, 0, 1, particle_count);
     glEndTransformFeedback();
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
@@ -427,10 +433,7 @@ void scene_particles::mainLoop() {
 
     glBindVertexArray(particle_vaos[active_vao_idx]);
 
-    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, position_buffers[active_vao_idx]);
-
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, particle_count);
-    // glDrawArraysInstanced(GL_POINTS, 0, particle_count, 1);
 
     active_vao_idx = 1 - active_vao_idx;
 }

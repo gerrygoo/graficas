@@ -22,7 +22,9 @@ uniform vec3 emisor_position;
 uniform float emisro_width;
 uniform float emisor_height;
 
-uniform samplerBuffer positions_texture;
+uniform vec3 camera_up;
+uniform vec3 camera_right;
+
 
 uniform float now;
 uniform float delta_time;
@@ -40,10 +42,7 @@ subroutine (type_of_render_fn) void render() {
         100 + VertexPosition.z
     ));
 
-    // vec4 vertex_position_from_texture = texelFetch(positions_texture, gl_VertexID);
-    vec4 vertex_position_from_texture = texelFetch(positions_texture, gl_InstanceID);
-    vec3 lol_position = ShapePosition;
-    gl_Position = mvp * vec4(lol_position + vertex_position_from_texture.xyz, 1.0);
+    gl_Position = mvp * vec4(ShapePosition + (camera_up * 10.0f) + (camera_right * 10.0f) + VertexPosition, 1.0);
 }
 
 subroutine (type_of_render_fn) void update() {
@@ -61,7 +60,7 @@ subroutine (type_of_render_fn) void update() {
             Velocity += acceleration * delta_time;
         } else {
             // past ttl, reset
-            Position = vec3(0.0f);
+            // Position = vec3(0.0f);
             Position = vec3(
                 mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( VertexPosition.x + delta_time )),
                 mix(emisor_position.y - (emisor_height / 2.0f), emisor_position.y + (emisor_height / 2.0f), rand( VertexPosition.y + delta_time )),
