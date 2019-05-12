@@ -188,5 +188,4 @@ private:
 	unsigned int particle_count;
 	Emisor emisor;
 	cgmath::vec3 acceleration;
-	float time_to_live;
 };

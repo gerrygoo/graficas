@@ -25,9 +25,9 @@ void scene_particles::awake() { glClearColor(0.0f, 0.0f, 0.0f, 1.0f); }
 void scene_particles::sleep() { glClearColor(0.0f, 0.0f, 0.0f, 1.0f); }
 void scene_particles::resize(int width, int height) {
     aspect = (float)width / (float)height;
-	glViewport(0, 0, width, height);
+    std::cout << "resized to: " << width << ", " << height << ", aspect: " << aspect << std::endl;
+    glViewport(0, 0, width, height);
 }
-
 
 void scene_particles::print_shader_compile_errors(GLuint shader) {
     GLint vertex_compiled;
@@ -222,7 +222,6 @@ void scene_particles::setup_uniforms() {
     now_uniform_location = glGetUniformLocation(program, "now");
     delta_time_uniform_location = glGetUniformLocation(program, "delta_time");
     acceleration_uniform_location = glGetUniformLocation(program, "acceleration");
-    time_to_live_uniform_location = glGetUniformLocation(program, "time_to_live");
     emisor_position_uniform_location = glGetUniformLocation(program, "emisor_position");
     emisro_width_uniform_location = glGetUniformLocation(program, "emisro_width");
     emisor_height_uniform_location = glGetUniformLocation(program, "emisor_height");
@@ -238,7 +237,6 @@ void scene_particles::setup_uniforms() {
     glUniform1f(emisro_width_uniform_location, emisor.width);
     glUniform1f(emisor_height_uniform_location, emisor.height);
     glUniform3f(emisor_position_uniform_location, emisor.position.x, emisor.position.y, emisor.position.z);
-    glUniform1f(time_to_live_uniform_location, time_to_live);
     glUniform3f(acceleration_uniform_location, acceleration.x, acceleration.y, acceleration.z);
 }
 
@@ -381,20 +379,22 @@ void scene_particles::setup_matrices() {
     far = 2000.0f,
     near = 0.01f,
     fov = 90;
-    projection = cgmath::mat4::perspective(1.0f, fov, near, far);
+    projection = cgmath::mat4::perspective(aspect, fov, near, far);
 
 }
 
 void scene_particles::init() {
     particle_count = 100000; // 8;
-    time_to_live = 20.0f;
+
     acceleration.y = 0.0f; // -9.8f;
+
     emisor.position.y = 50.0;
     emisor.height = 500.0f;
     emisor.width = 500.0f;
 
     disp_speed = 150.0f;
     turn_speed = 30.0f;
+    aspect = 1.0f;
 
     glPointSize(5.0f);
     glClearColor(0.0f,0.0f,0.0f,1.0f);

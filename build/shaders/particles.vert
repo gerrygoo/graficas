@@ -17,7 +17,6 @@ out float particle_simulated_start_time; // tf varying
 out vec3 interpolated_color;
 out vec2 tex_coord;
 
-uniform float time_to_live;
 uniform vec3 acceleration;
 uniform vec3 emisor_position;
 uniform float emisro_width;
@@ -90,32 +89,13 @@ subroutine (type_of_render_fn) void render() {
 subroutine (type_of_render_fn) void update() {
     particle_simulated_position = particle_position;
     particle_simulated_velocity = particle_velocity;
-    particle_simulated_start_time = particle_start_time;
+    particle_simulated_start_time = 0.0f;
 
-    // if( now >= particle_simulated_start_time ) {
+    particle_simulated_position += particle_simulated_velocity * delta_time;
 
-        float age = now - particle_simulated_start_time;
+    vec3 to_camera_acceleration = 20.0f * normalize(camera_position - particle_position);
 
-        // if( age < time_to_live ) {
-            // alive, simulate
-            particle_simulated_position += particle_simulated_velocity * delta_time;
-
-            vec3 to_camera_acceleration = 20.0f * normalize(/*camera_position*/vec3(300.0f, 50.0f, 300.0f) - particle_position);
-
-            particle_simulated_velocity += to_camera_acceleration * delta_time;
-            // particle_simulated_velocity += acceleration * delta_time;
-        // } else {
-        //     // past ttl, reset
-        //     particle_simulated_position = vec3(
-        //         mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( particle_position.x + delta_time )),
-        //         mix(emisor_position.y - (emisor_height / 2.0f), emisor_position.y + (emisor_height / 2.0f), rand( particle_position.y + delta_time )),
-        //         mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( particle_position.z + delta_time ))
-        //     );
-        //     particle_simulated_velocity = particle_inital_velocity;
-        //     particle_simulated_start_time = now;
-        // }
-
-    // }a
+    particle_simulated_velocity += to_camera_acceleration * delta_time;
 }
 
 void main() {
