@@ -95,10 +95,10 @@ struct Camera {
 		position_m[3].y = -position.y;
 		position_m[3].z = -position.z;
 
-		std::cout << std::endl << "direction: " << direction << std::endl;
-		std::cout << "right: " << right << std::endl << std::endl;
-		std::cout << "up: " << up << std::endl;
-		std::cout << "pitch: " << pitch << ", yaw: " << yaw << ", position: " << position << std::endl;
+		// std::cout << std::endl << "direction: " << direction << std::endl;
+		// std::cout << "right: " << right << std::endl << std::endl;
+		// std::cout << "up: " << up << std::endl;
+		// std::cout << "pitch: " << pitch << ", yaw: " << yaw << ", position: " << position << std::endl;
 		// std::cout << "camera position_m: " << std::endl << position_m << std::endl;
 		// std::cout << "camera rotation_m: " << std::endl << rotation_m << std::endl;
 
@@ -162,6 +162,7 @@ private:
 	GLint projection_matrix_uniform_location;
 
 	GLint drop_texture_uniform_location;
+	GLint positions_texture_uniform_location;
 
 	GLint camera_position_uniform_location;
 
@@ -179,6 +180,7 @@ private:
 	GLuint shape_vertex_buffer;
 
 	GLuint drop_texture;
+	GLuint positions_texture;
 
 	int active_vao_idx;
 

@@ -1,4 +1,4 @@
-#version 410
+#version 420
 
 subroutine void type_of_render_fn();
 
@@ -12,7 +12,6 @@ layout (location = 4) in vec3 ShapePosition;
 
 out vec3 particle_simulated_position;   // tf varying
 out vec3 particle_simulated_velocity;   // tf varying
-out float particle_simulated_start_time; // tf varying
 
 out vec3 interpolated_color;
 out vec2 tex_coord;
@@ -22,6 +21,7 @@ uniform vec3 emisor_position;
 uniform float emisro_width;
 uniform float emisor_height;
 
+uniform image3D positions_texture;
 
 uniform float now;
 uniform float delta_time;
@@ -89,7 +89,6 @@ subroutine (type_of_render_fn) void render() {
 subroutine (type_of_render_fn) void update() {
     particle_simulated_position = particle_position;
     particle_simulated_velocity = particle_velocity;
-    particle_simulated_start_time = 0.0f;
 
     particle_simulated_position += particle_simulated_velocity * delta_time;
 

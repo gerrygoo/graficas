@@ -167,8 +167,8 @@ void scene_particles::setup_program_with_shaders() {
     glAttachShader(program, fragment_shader);
 
 
-    const char * outputNames[] = { "particle_simulated_position", "particle_simulated_velocity", "particle_simulated_start_time" };
-    glTransformFeedbackVaryings(program, 3, outputNames, GL_SEPARATE_ATTRIBS);
+    const char * outputNames[] = { "particle_simulated_position", "particle_simulated_velocity" };
+    glTransformFeedbackVaryings(program, 2, outputNames, GL_SEPARATE_ATTRIBS);
 
 
     glLinkProgram(program);
@@ -181,7 +181,7 @@ void scene_particles::setup_program_with_shaders() {
 }
 
 void scene_particles::setup_textures() {
-    ILuint imageID, imageID1;
+    ILuint imageID;
 
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
@@ -214,8 +214,35 @@ void scene_particles::setup_textures() {
 	ilBindImage(0);
 	ilDeleteImages(1, &imageID);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, drop_texture);
+
+    unsigned int position_texture_side = 100;
+    unsigned long int data_size = position_texture_side * position_texture_side * position_texture_side;
+
+    GLfloat* data = new GLfloat[data_size];
+    for(unsigned long int i = 0; i < data_size; i++) {
+        data[i] = 0.0f;
+    }
+    delete [] data;
+
+    glGenTextures(1, &positions_texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_3D, positions_texture);
+    {
+        glTexImage3D(
+            GL_TEXTURE_3D,
+            0,
+            GL_RGB,
+            position_texture_side,
+            position_texture_side,
+            position_texture_side,
+            0,
+            GL_RGB,
+            GL_FLOAT,
+            data
+        );
+
+    }
+    glBindTexture(GL_TEXTURE_3D, 0);
 }
 
 void scene_particles::setup_uniforms() {
@@ -229,6 +256,7 @@ void scene_particles::setup_uniforms() {
 	projection_matrix_uniform_location = glGetUniformLocation(program, "projection_matrix");
     camera_position_uniform_location = glGetUniformLocation(program, "camera_position");
 
+    positions_texture_uniform_location = glGetUniformLocation(program, "location_texture");
     drop_texture_uniform_location = glGetUniformLocation(program, "drop_texture");
 
     render_subroutine_idx = glGetSubroutineIndex(program, GL_VERTEX_SHADER, "render");
@@ -251,7 +279,7 @@ void scene_particles::setup_buffers() {
     const unsigned int sizeof_1f_buffer = sizeof(float) * particle_count;
     const unsigned int sizeof_shape_vertex_buffer = 6 * 3 * sizeof(float);
 
-    // alloc
+    #pragma region alloc
     glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof_3f_buffer, NULL, GL_DYNAMIC_COPY);
 
@@ -268,8 +296,9 @@ void scene_particles::setup_buffers() {
         glBindBuffer(GL_ARRAY_BUFFER, start_time_buffers[i]);
         glBufferData(GL_ARRAY_BUFFER, sizeof_1f_buffer, NULL, GL_DYNAMIC_COPY);
     }
+    #pragma endregion
 
-    //#pragma region initial values
+    #pragma region initial values
         GLfloat shape_points[6][3] = {
             {-1.0f, 1.0f, 0.0f},
             {-1.0f, -1.0f, 0.0f},
@@ -312,6 +341,7 @@ void scene_particles::setup_buffers() {
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_3f_buffer, data);
 
         delete [] data;
+
         data = new GLfloat[particle_count];
         float time = 0.0f;
         float rate = 0.0001f;
@@ -325,9 +355,9 @@ void scene_particles::setup_buffers() {
 
         glBindBuffer(GL_ARRAY_BUFFER,0);
 
-    //#pragma endregion
+    #pragma endregion
 
-
+    #pragma region vertex_attribute_binding
     glGenVertexArrays(2, particle_vaos);
     for (int i = 0; i < 2; i++) {
         glBindVertexArray(particle_vaos[i]);
@@ -356,13 +386,14 @@ void scene_particles::setup_buffers() {
         glEnableVertexAttribArray(4);
     }
     glBindVertexArray(0);
+    #pragma endregion
 
     glGenTransformFeedbacks(2, particle_tfos);
     for (int i = 0; i < 2; i++) {
         glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, particle_tfos[i]);
         glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, position_buffers[i]);
         glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, velocity_buffers[i]);
-        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 2, start_time_buffers[i]);
+        // glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 2, start_time_buffers[i]);
     }
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 }
@@ -441,8 +472,17 @@ void scene_particles::mainLoop() {
 
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, particle_tfos[active_vao_idx]);
     glBeginTransformFeedback(GL_POINTS);
-        glBindVertexArray(particle_vaos[1 - active_vao_idx]);
-        glDrawArraysInstanced(GL_POINTS, 0, 1, particle_count);
+
+    glBindVertexArray(particle_vaos[1 - active_vao_idx]);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_3D, positions_texture);
+
+    glDrawArraysInstanced(GL_POINTS, 0, 1, particle_count);
+
+    glBindTexture(GL_TEXTURE_3D, 0);
+
+
     glEndTransformFeedback();
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
@@ -453,12 +493,19 @@ void scene_particles::mainLoop() {
         camera.move(time_util::delta_time().count());
         this->set_mvp_uniform();
     }
+
     glUniformSubroutinesuiv(GL_VERTEX_SHADER, 1, &render_subroutine_idx);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glBindVertexArray(particle_vaos[active_vao_idx]);
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, drop_texture);
+
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, particle_count);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     active_vao_idx = 1 - active_vao_idx;
 }
