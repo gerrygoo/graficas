@@ -88,11 +88,11 @@ void scene_textures::setup_shaders() {
 
 void scene_textures::setup_textures() {
 	ILuint imageID, imageID1;
-	
+
 	ilGenImages(1, &imageID);
 	ilBindImage(imageID);
 	{
-		ilLoadImage("textures/metal.jpg");
+		ilLoadImage("images/metal.jpg");
 		glGenTextures(1, &metal_texture);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, metal_texture);
@@ -120,11 +120,11 @@ void scene_textures::setup_textures() {
 	}
 	ilBindImage(0);
 	ilDeleteImages(1, &imageID);
-	
+
 	ilGenImages(1, &imageID1);
-	ilBindImage(imageID1); 
+	ilBindImage(imageID1);
 	{
-		ilLoadImage("textures/lucina.jpg");
+		ilLoadImage("images/lucina.jpg");
 
 		glGenTextures(1, &lucina_texture);
 		glActiveTexture(GL_TEXTURE1);
@@ -158,7 +158,7 @@ void scene_textures::init() {
 	this->setup_shaders();
 	this->setup_textures();
 	{
-		// +z axis outwards, towards 'me' 
+		// +z axis outwards, towards 'me'
 		float p3 = 3.0f;
 		float m3 = -3.0f;
 

@@ -2,19 +2,20 @@
 
 subroutine void type_of_render_fn();
 
-layout (location = 0) in vec3 VertexPosition;
-layout (location = 1) in vec3 VertexVelocity;
-layout (location = 2) in float VertexStartTime;
-layout (location = 3) in vec3 VertexInitialVelocity;
+layout (location = 0) in vec3 particle_position;
+layout (location = 1) in vec3 particle_velocity;
+layout (location = 2) in float particle_start_time;
+layout (location = 3) in vec3 particle_inital_velocity;
 
 layout (location = 4) in vec3 ShapePosition;
 
 
-out vec3 Position;   // tf varying
-out vec3 Velocity;   // tf varying
-out float StartTime; // tf varying
+out vec3 particle_simulated_position;   // tf varying
+out vec3 particle_simulated_velocity;   // tf varying
+out float particle_simulated_start_time; // tf varying
 
 out vec3 interpolated_color;
+out vec2 tex_coord;
 
 uniform float time_to_live;
 uniform vec3 acceleration;
@@ -22,13 +23,14 @@ uniform vec3 emisor_position;
 uniform float emisro_width;
 uniform float emisor_height;
 
-uniform vec3 camera_up;
-uniform vec3 camera_right;
-
 
 uniform float now;
 uniform float delta_time;
-uniform mat4 mvp;
+
+uniform mat4 view_matrix;
+uniform mat4 projection_matrix;
+uniform vec3 camera_position;
+
 subroutine uniform type_of_render_fn render_fn;
 
 float rand(float x) {
@@ -36,41 +38,84 @@ float rand(float x) {
 }
 
 subroutine (type_of_render_fn) void render() {
-    interpolated_color = normalize(vec3(
-        50 + VertexPosition.x,
-        50 + VertexPosition.y,
-        100 + VertexPosition.z
-    ));
+    interpolated_color = normalize(vec3( 50 + particle_position.x, 50 + particle_position.y, 100 + particle_position.z));
 
-    gl_Position = mvp * vec4(ShapePosition + (camera_up * 10.0f) + (camera_right * 10.0f) + VertexPosition, 1.0);
+	switch (gl_VertexID) {
+		case 0:
+			tex_coord = vec2(0.0f, 1.0f);
+			break;
+		case 1:
+			tex_coord = vec2(0.0f, 0.0f);
+			break;
+		case 2:
+			tex_coord = vec2(1.0f, 1.0f);
+			break;
+		case 3:
+			tex_coord = vec2(1.0f, 1.0f);
+			break;
+		case 4:
+			tex_coord = vec2(0.0f, 0.0f);
+			break;
+		case 5:
+			tex_coord = vec2(1.0f, 0.0f);
+			break;
+	}
+
+    float scale = 1.0f;
+    vec3 position = particle_position;
+    mat4 model_matrix = mat4(
+        vec4(scale, 0.0f, 0.0f, 0.0f),
+        vec4(0.0f, scale, 0.0f, 0.0f),
+        vec4(0.0f, 0.0f, scale, 0.0f),
+        vec4( position.x, position.y, position.z, 1.0f)
+    );
+    mat4 vm = ( view_matrix * model_matrix );
+
+
+    vm[0][0] = 1.0f;
+    vm[0][1] = 0.0f;
+    vm[0][2] = 0.0f;
+
+    vm[1][0] = 0.0f;
+    vm[1][1] = 1.0f;
+    vm[1][2] = 0.0f;
+
+    vm[2][0] = 0.0f;
+    vm[2][1] = 0.0f;
+    vm[2][2] = 1.0f;
+
+    gl_Position = ( projection_matrix * vm ) * vec4(ShapePosition, 1.0);
 }
 
 subroutine (type_of_render_fn) void update() {
-    Position = VertexPosition;
-    Velocity = VertexVelocity;
-    StartTime = VertexStartTime;
+    particle_simulated_position = particle_position;
+    particle_simulated_velocity = particle_velocity;
+    particle_simulated_start_time = particle_start_time;
 
-    if( now >= StartTime ) {
+    // if( now >= particle_simulated_start_time ) {
 
-        float age = now - StartTime;
+        float age = now - particle_simulated_start_time;
 
-        if( age < time_to_live ) {
+        // if( age < time_to_live ) {
             // alive, simulate
-            Position += Velocity * delta_time;
-            Velocity += acceleration * delta_time;
-        } else {
-            // past ttl, reset
-            // Position = vec3(0.0f);
-            Position = vec3(
-                mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( VertexPosition.x + delta_time )),
-                mix(emisor_position.y - (emisor_height / 2.0f), emisor_position.y + (emisor_height / 2.0f), rand( VertexPosition.y + delta_time )),
-                mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( VertexPosition.z + delta_time ))
-            );
-            Velocity = VertexInitialVelocity;
-            StartTime = now;
-        }
+            particle_simulated_position += particle_simulated_velocity * delta_time;
 
-    }
+            vec3 to_camera_acceleration = 20.0f * normalize(camera_position - particle_position);
+
+            particle_simulated_velocity += to_camera_acceleration * delta_time;
+            // particle_simulated_velocity += acceleration * delta_time;
+        // } else {
+        //     // past ttl, reset
+        //     particle_simulated_position = vec3(
+        //         mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( particle_position.x + delta_time )),
+        //         mix(emisor_position.y - (emisor_height / 2.0f), emisor_position.y + (emisor_height / 2.0f), rand( particle_position.y + delta_time )),
+        //         mix(emisor_position.x - (emisro_width / 2.0f), emisor_position.x + (emisro_width / 2.0f), rand( particle_position.z + delta_time ))
+        //     );
+        //     particle_simulated_velocity = particle_inital_velocity;
+        //     particle_simulated_start_time = now;
+        // }
+
+    // }a
 }
 
 void main() {

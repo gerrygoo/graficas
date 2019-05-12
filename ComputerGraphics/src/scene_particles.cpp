@@ -1,11 +1,10 @@
 #include "scene_particles.h"
 
 #include <math.h>
-
 #include <vector>
 #include <iostream>
 #include <algorithm>
-
+#include <IL/il.h>
 
 #include "time_util.h"
 #include "ifile.h"
@@ -168,7 +167,7 @@ void scene_particles::setup_program_with_shaders() {
     glAttachShader(program, fragment_shader);
 
 
-    const char * outputNames[] = { "Position", "Velocity", "StartTime" };
+    const char * outputNames[] = { "particle_simulated_position", "particle_simulated_velocity", "particle_simulated_start_time" };
     glTransformFeedbackVaryings(program, 3, outputNames, GL_SEPARATE_ATTRIBS);
 
 
@@ -181,17 +180,57 @@ void scene_particles::setup_program_with_shaders() {
     glUseProgram(program);
 }
 
+void scene_particles::setup_textures() {
+    ILuint imageID, imageID1;
+
+	ilGenImages(1, &imageID);
+	ilBindImage(imageID);
+	{
+        ilLoadImage("images/pig.png");
+		glGenTextures(1, &drop_texture);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, drop_texture);
+		{
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				ilGetInteger(IL_IMAGE_FORMAT),
+				ilGetInteger(IL_IMAGE_WIDTH),
+				ilGetInteger(IL_IMAGE_HEIGHT),
+				0,
+				ilGetInteger(IL_IMAGE_FORMAT),
+				ilGetInteger(IL_IMAGE_TYPE),
+				ilGetData()
+			);
+
+		}
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+	}
+	ilBindImage(0);
+	ilDeleteImages(1, &imageID);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, drop_texture);
+}
+
 void scene_particles::setup_uniforms() {
     now_uniform_location = glGetUniformLocation(program, "now");
     delta_time_uniform_location = glGetUniformLocation(program, "delta_time");
     acceleration_uniform_location = glGetUniformLocation(program, "acceleration");
     time_to_live_uniform_location = glGetUniformLocation(program, "time_to_live");
-    mvp_uniform_location = glGetUniformLocation(program, "mvp");
     emisor_position_uniform_location = glGetUniformLocation(program, "emisor_position");
     emisro_width_uniform_location = glGetUniformLocation(program, "emisro_width");
     emisor_height_uniform_location = glGetUniformLocation(program, "emisor_height");
-    camera_up_uniform_location = glGetUniformLocation(program, "camera_up");
-	camera_right_uniform_location = glGetUniformLocation(program, "camera_right");
+    view_matrix_uniform_location = glGetUniformLocation(program, "view_matrix");
+	projection_matrix_uniform_location = glGetUniformLocation(program, "projection_matrix");
+    camera_position_uniform_location = glGetUniformLocation(program, "camera_position");
+
+    drop_texture_uniform_location = glGetUniformLocation(program, "drop_texture");
 
     render_subroutine_idx = glGetSubroutineIndex(program, GL_VERTEX_SHADER, "render");
     update_subroutine_idx = glGetSubroutineIndex(program, GL_VERTEX_SHADER, "update");
@@ -234,12 +273,12 @@ void scene_particles::setup_buffers() {
 
     //#pragma region initial values
         GLfloat shape_points[6][3] = {
-            {-0.3f, 1.0f, 0.0f},
-            {-0.3f, -1.0f, 0.0f},
-            {0.3f, 1.0f, 0.0f},
-            {0.3f, 1.0f, 0.0f},
-            {-0.3f, -1.0f, 0.0f},
-            {0.3f, -1.0f, 0.0f},
+            {-1.0f, 1.0f, 0.0f},
+            {-1.0f, -1.0f, 0.0f},
+            {1.0f, 1.0f, 0.0f},
+            {1.0f, 1.0f, 0.0f},
+            {-1.0f, -1.0f, 0.0f},
+            {1.0f, -1.0f, 0.0f},
         };
 
         GLfloat *data = new GLfloat[particle_count * 3];
@@ -251,17 +290,10 @@ void scene_particles::setup_buffers() {
         glBindBuffer(GL_ARRAY_BUFFER, shape_vertex_buffer);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_shape_vertex_buffer, shape_points);
 
-        // GLfloat *data = new GLfloat[particle_count * 3];
         for( int i = 0; i < particle_count; i++ ) {
-            if (debug) {
-                data[3*i] = 0.0f;
-                data[3*i+1] = 0.0f;
-                data[3*i+2] = 0.0f;
-            } else {
-                data[3*i] = mix(emisor.position.x - (emisor.width/2.0f), emisor.position.x + (emisor.width/2.0f), drand48());
-                data[3*i+1] = mix(emisor.position.y - (emisor.height/2.0f), emisor.position.y + (emisor.height/2.0f), drand48());
-                data[3*i+2] = mix(emisor.position.x - (emisor.width/2.0f), emisor.position.x + (emisor.width/2.0f), drand48());
-            }
+            data[3*i] = mix(emisor.position.x - (emisor.width/2.0f), emisor.position.x + (emisor.width/2.0f), drand48());
+            data[3*i+1] = mix(emisor.position.y - (emisor.height/2.0f), emisor.position.y + (emisor.height/2.0f), drand48());
+            data[3*i+2] = mix(emisor.position.x - (emisor.width/2.0f), emisor.position.x + (emisor.width/2.0f), drand48());
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, position_buffers[0]);
@@ -271,15 +303,9 @@ void scene_particles::setup_buffers() {
         cgmath::vec3 v(0.0f);
         float velocity = 0.0f;
         for( int i = 0; i < particle_count; i++ ) {
-            if (debug) {
-                data[3*i]   = (i + 1) % 3 == 0 ? velocity : 0;
-                data[3*i+1] = (i + 1) % 3 == 1 ? 0.5f : 0;
-                data[3*i+2] = (i + 1) % 3 == 2 ? velocity : 0;
-            } else {
                 data[3*i]   = 0;
                 data[3*i+1] = 0;
                 data[3*i+2] = 0;
-            }
         }
         glBindBuffer(GL_ARRAY_BUFFER, initial_velocity_buffer);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof_3f_buffer, data);
@@ -345,41 +371,42 @@ void scene_particles::setup_buffers() {
 
 
 void scene_particles::setup_camera() {
-    camera.position = debug ? cgmath::vec3(0.0f, 1.0f, 3.0f) : cgmath::vec3(0.0f, 45.0f, 0.0f);
+    camera.position = cgmath::vec3(0.0f, 45.0f, 550.0f);
 }
 
 void scene_particles::setup_matrices() {
-    model = cgmath::mat4(0.1f);
+    model = cgmath::mat4(1.0f);
     view = camera.look();
-    projection = cgmath::mat4(1.0f);
-
 
     far = 2000.0f,
     near = 0.01f,
     fov = 90;
-
     projection = cgmath::mat4::perspective(1.0f, fov, near, far);
 
 }
 
 void scene_particles::init() {
-    debug = false;
-    particle_count = 100000 * 3; // 8;
-    time_to_live = debug ? 60.0f : 20.0f;
-    acceleration.y = debug ? 0 : -0.98f;
+    particle_count = 100000; // 8;
+    time_to_live = 20.0f;
+    acceleration.y = 0.0f; // -9.8f;
     emisor.position.y = 50.0;
-    emisor.height = 1.0f;
+    emisor.height = 500.0f;
     emisor.width = 500.0f;
 
-    disp_speed = debug ? 10.0f : 50.0f;
-    turn_speed = debug ? 10.0f : 30.0f;
+    disp_speed = 150.0f;
+    turn_speed = 30.0f;
 
-    glPointSize(debug ? 20.0f : 5.0f);
+    glPointSize(5.0f);
     glClearColor(0.0f,0.0f,0.0f,1.0f);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
 
     this->setup_program_with_shaders();
 	this->setup_uniforms();
     this->setup_buffers();
+
+    this->setup_textures();
 
     this->setup_camera();
 
@@ -394,10 +421,9 @@ void scene_particles::init() {
 
 void scene_particles::set_mvp_uniform() {
     view = camera.look();
-    mvp = projection * view * model;
-    glUniformMatrix4fv(mvp_uniform_location, 1, GL_FALSE, &mvp[0][0]);
-    // glUniform3fv(camera_up_uniform_location, 1, &camera.up[0]);
-    glUniform3fv(camera_right_uniform_location, 1, &camera.direction[0]);
+    glUniform3fv(camera_position_uniform_location, 1, &camera.position[0] );
+    glUniformMatrix4fv(projection_matrix_uniform_location, 1, GL_FALSE, &projection[0][0]);
+    glUniformMatrix4fv(view_matrix_uniform_location, 1, GL_FALSE, &view[0][0]);
 }
 
 void scene_particles::set_delta_time_uniform() {
@@ -416,7 +442,6 @@ void scene_particles::mainLoop() {
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, particle_tfos[active_vao_idx]);
     glBeginTransformFeedback(GL_POINTS);
         glBindVertexArray(particle_vaos[1 - active_vao_idx]);
-        // glDrawArrays(GL_POINTS, 0, particle_count);
         glDrawArraysInstanced(GL_POINTS, 0, 1, particle_count);
     glEndTransformFeedback();
     glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);

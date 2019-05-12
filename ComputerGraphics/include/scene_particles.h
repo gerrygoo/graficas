@@ -97,7 +97,8 @@ struct Camera {
 
 		std::cout << std::endl << "direction: " << direction << std::endl;
 		std::cout << "right: " << right << std::endl << std::endl;
-		// std::cout << "pitch: " << pitch << ", yaw: " << yaw << ", position: " << position << std::endl;
+		std::cout << "up: " << up << std::endl;
+		std::cout << "pitch: " << pitch << ", yaw: " << yaw << ", position: " << position << std::endl;
 		// std::cout << "camera position_m: " << std::endl << position_m << std::endl;
 		// std::cout << "camera rotation_m: " << std::endl << rotation_m << std::endl;
 
@@ -111,9 +112,6 @@ struct Emisor {
 	Emisor(): position(0.0f), width(5.0f), height(5.0f) { }
 };
 
-// struct Movement {
-// 	bool u,
-// };
 
 class scene_particles : public scene {
 public:
@@ -134,14 +132,13 @@ public:
 	void print_program_link_errors();
 
 	void setup_uniforms();
+	void setup_textures();
 	void setup_buffers();
 	void setup_matrices();
 	void setup_camera();
 
 	void set_mvp_uniform();
-
 	void set_delta_time_uniform();
-	void set_view_matrix();
 
 private:
 	bool debug;
@@ -151,20 +148,24 @@ private:
 	GLuint program;
 
 
-	GLuint now_uniform_location;
-	GLuint delta_time_uniform_location;
-	GLuint acceleration_uniform_location;
-	GLuint time_to_live_uniform_location;
+	GLint now_uniform_location;
+	GLint delta_time_uniform_location;
+	GLint acceleration_uniform_location;
+	GLint time_to_live_uniform_location;
 	GLuint render_subroutine_idx;
 	GLuint update_subroutine_idx;
-	GLuint emisor_position_uniform_location;
-	GLuint emisro_width_uniform_location;
-	GLuint emisor_height_uniform_location;
+	GLint emisor_position_uniform_location;
+	GLint emisro_width_uniform_location;
+	GLint emisor_height_uniform_location;
 
-	GLuint camera_up_uniform_location;
-	GLuint camera_right_uniform_location;
+	GLint view_matrix_uniform_location;
+	GLint projection_matrix_uniform_location;
 
-	GLuint mvp_uniform_location;
+	GLint drop_texture_uniform_location;
+
+	GLint camera_position_uniform_location;
+
+
 	cgmath::mat4 model, view, projection, mvp;
 	Camera camera;
 
@@ -172,15 +173,12 @@ private:
 	GLuint particle_tfos[2];
 
 	GLuint initial_velocity_buffer;
-
 	GLuint position_buffers[2];
 	GLuint velocity_buffers[2];
 	GLuint start_time_buffers[2];
-
-
 	GLuint shape_vertex_buffer;
 
-	GLuint positions_texture;
+	GLuint drop_texture;
 
 	int active_vao_idx;
 
