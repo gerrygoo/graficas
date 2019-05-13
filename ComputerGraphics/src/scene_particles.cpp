@@ -215,19 +215,24 @@ void scene_particles::setup_textures() {
 	ilDeleteImages(1, &imageID);
 
 
-    unsigned int position_texture_side = 100;
+    unsigned int position_texture_side = 200;
     unsigned long int data_size = position_texture_side * position_texture_side * position_texture_side;
 
     GLfloat* data = new GLfloat[data_size];
     for(unsigned long int i = 0; i < data_size; i++) {
-        data[i] = 0.0f;
+        data[i] = drand48();
     }
     delete [] data;
 
     glGenTextures(1, &positions_texture);
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_3D, positions_texture);
     {
+        glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_MIRRORED_REPEAT);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
         glTexImage3D(
             GL_TEXTURE_3D,
             0,
@@ -475,12 +480,12 @@ void scene_particles::mainLoop() {
 
     glBindVertexArray(particle_vaos[1 - active_vao_idx]);
 
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_3D, positions_texture);
+    // glActiveTexture(GL_TEXTURE2);
+    // glBindTexture(GL_TEXTURE_3D, positions_texture);
 
     glDrawArraysInstanced(GL_POINTS, 0, 1, particle_count);
 
-    glBindTexture(GL_TEXTURE_3D, 0);
+    // glBindTexture(GL_TEXTURE_3D, 0);
 
 
     glEndTransformFeedback();
@@ -505,6 +510,7 @@ void scene_particles::mainLoop() {
 
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, particle_count);
 
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     active_vao_idx = 1 - active_vao_idx;

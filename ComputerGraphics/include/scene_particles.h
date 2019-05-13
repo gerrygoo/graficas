@@ -98,7 +98,7 @@ struct Camera {
 		// std::cout << std::endl << "direction: " << direction << std::endl;
 		// std::cout << "right: " << right << std::endl << std::endl;
 		// std::cout << "up: " << up << std::endl;
-		// std::cout << "pitch: " << pitch << ", yaw: " << yaw << ", position: " << position << std::endl;
+		std::cout << "pitch: " << pitch << ", yaw: " << yaw << ", position: " << position << std::endl;
 		// std::cout << "camera position_m: " << std::endl << position_m << std::endl;
 		// std::cout << "camera rotation_m: " << std::endl << rotation_m << std::endl;
 

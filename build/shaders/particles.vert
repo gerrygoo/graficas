@@ -1,4 +1,4 @@
-#version 420
+#version 410
 
 subroutine void type_of_render_fn();
 
@@ -21,7 +21,7 @@ uniform vec3 emisor_position;
 uniform float emisro_width;
 uniform float emisor_height;
 
-uniform image3D positions_texture;
+// uniform sampler3D positions_texture;
 
 uniform float now;
 uniform float delta_time;
@@ -93,6 +93,8 @@ subroutine (type_of_render_fn) void update() {
     particle_simulated_position += particle_simulated_velocity * delta_time;
 
     vec3 to_camera_acceleration = 20.0f * normalize(camera_position - particle_position);
+
+    // vec4 space_acceleration = texture( positions_texture, vec3(0.2f, 0.2f, 0.2f) );
 
     particle_simulated_velocity += to_camera_acceleration * delta_time;
 }
